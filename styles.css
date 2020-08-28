@@ -1,0 +1,29 @@
+.selButt{
+  height: 2rem;
+  width: 2rem;
+  border:solid 2px rgba(255, 255, 255, 0.733);
+  border-radius: 100%;
+  margin:0.4rem 0.6rem;
+  cursor: pointer;
+}
+.selButt:hover{
+  background-color: rgba(146, 0, 0, 0.479);
+}
+.selFill{
+  height: 1rem;
+  width: 1rem;
+  border-radius: 100%;
+  background-color: rgb(211, 0, 0);
+}
+.selFill:hover{
+  background-color: rgb(146, 0, 0);
+}
+.tippy-arrow {
+  color: var(--bg) !important;
+}
+.tippy-content {
+  height: 25rem;
+}
+.text-selectable {
+  -webkit-user-select: text;
+}

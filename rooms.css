@@ -1,0 +1,24 @@
+#grid{
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+.item{
+    padding: 3rem 1rem;
+}
+#createSec{
+    padding: 1.2rem;
+    min-height: 16rem;
+    max-width: 54rem;
+    margin-top:2rem;
+}
+@media(max-width:900px){
+    #createSec{
+        margin-top:0px;
+    }
+    #grid{
+        display: block;
+    }
+    .item{
+        padding: 1rem 1rem;
+    }
+}

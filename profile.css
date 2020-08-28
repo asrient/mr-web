@@ -1,0 +1,17 @@
+#avatar{
+    height: 7rem;
+    width: 7rem;
+    margin: 1rem;
+    background-color: rgba(59, 59, 59, 0.486);
+    border-radius: 100%;
+}
+#f_status{
+    padding: 0.2rem 1rem;
+    border-radius: 1.3rem;
+    border: solid thin rgba(255, 255, 255, 0.438);
+    color:var(--grey);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-user-select: none;
+}

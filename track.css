@@ -1,0 +1,47 @@
+.link{
+    margin: 0.1rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.link:hover{
+opacity: 0.7rem;
+}
+.trackContainer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 30rem;
+    padding: 0.65rem 0.5rem;
+    border:solid thin rgba(255, 255, 255, 0.068);
+    border-radius: 0.1rem;
+}
+.content{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.title{
+    font-size: 1.1rem;
+    padding: 0.2rem 0.3rem;
+}
+.artists{
+    font-size: 0.9rem;
+    padding-left: 0.7rem;
+}
+.duration{
+padding-right: 1.2rem;
+color:var(--grey);
+font-size: 0.9rem;
+font-weight: 500;
+}
+.art{
+    height: 3.6rem;
+    width: 3.6rem;
+    margin:0.6rem;
+    margin-right: 1.2rem;
+    background-color: rgba(99, 99, 99, 0.548);
+    border-radius: 0.2rem;
+}
