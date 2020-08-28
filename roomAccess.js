@@ -4,7 +4,7 @@ import Header from "./header.js";
 import { UserItem } from "./user.js";
 import { SelectButton } from "./global.js";
 import { Link, Redirect } from "wouter";
-import css from "./roomAccess.css";
+import css from "./common.css";
 
 class RoomAccess extends React.Component {
     constructor(props) {

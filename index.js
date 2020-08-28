@@ -2,6 +2,9 @@ import $ from "jquery";
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import Rooms from "./rooms.js";
+import Room from "./room.js";
+import FriendRequests from "./FriendRequests.js";
+import Friends from "./friends.js";
 import RoomPreview from "./roomPreview.js";
 import AddTracks from "./addTracks.js";
 import RoomAccess from "./roomAccess.js";
@@ -50,10 +53,27 @@ ReactDOM.render(
                 <AddTracks action="create-room" />
             </LoginRequired>
         </Route>
+        <Route path="/friendRequests">
+            <LoginRequired>
+                <FriendRequests />
+            </LoginRequired>
+        </Route>
+        <Route path="/friends">
+            <LoginRequired>
+                <Friends />
+            </LoginRequired>
+        </Route>
         <Route path="/room/addTracks">
             <LoginRequired>
                 <RoomRequired>
                     <AddTracks action="add-tracks" />
+                </RoomRequired>
+            </LoginRequired>
+        </Route>
+        <Route path="/room">
+            <LoginRequired>
+                <RoomRequired>
+                    <Room />
                 </RoomRequired>
             </LoginRequired>
         </Route>

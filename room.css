@@ -1,0 +1,61 @@
+.delButt {
+  height: 1.6rem;
+  width: 1.6rem;
+  background-color: rgba(255, 0, 0, 0.521);
+  margin: 0.5rem;
+  border-radius: 100%;
+  cursor: pointer;
+  -webkit-user-select: none;
+}
+.delButt:hover {
+  background-color: rgb(221, 0, 0);
+}
+.trashIcon {
+  font-size: 0.75rem;
+  margin: 0px;
+}
+#main {
+  display: grid;
+  grid-template-columns: 55% 45%;
+  width: 100%;
+}
+@media (max-width: 900px) {
+  #main {
+    display: block;
+  }
+}
+#p1 {
+  min-height: 25rem;
+}
+#player {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 4.6rem;
+  background-color: #131313b5;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  max-width: 30rem;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 0.2rem;
+  margin-top: 0.6rem;
+  border: solid thin rgba(97, 0, 0, 0.685);
+  display: grid;
+  grid-template-columns: auto 7rem;
+  box-shadow: 0px 3px 6px 4px #00000063;
+  overflow: hidden;
+}
+.playCircle{
+    height: 3.2rem;
+    width:3.2rem;
+    font-size: 1.1rem;
+    margin:0.5rem;
+    border:solid 2px rgb(189, 189, 189);
+    border-radius: 100%;
+    cursor: pointer;
+    -webkit-user-select: none;
+}
+.playCircle:hover{
+    background-color: rgba(207, 0, 0, 0.795);
+    border:none;
+}

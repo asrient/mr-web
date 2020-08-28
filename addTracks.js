@@ -4,7 +4,7 @@ import Header from "./header.js";
 import { TrackItem } from "./track.js";
 import { SelectButton } from "./global.js";
 import { Link, Redirect } from "wouter";
-import css from "./addTracks.css";
+import css from "./common.css";
 
 class AddTracks extends React.Component {
     constructor(props) {
@@ -52,14 +52,14 @@ class AddTracks extends React.Component {
     }
     next = () => {
         if (!this.state.wait) {
+            this.setState({ ...this.state, wait: true })
             if (this.props.action == 'create-room') {
-                this.setState({ ...this.state, wait: true })
                 window.state.createRoom(this.state.selected, (res) => {
                     this.setState({ ...this.state, wait: false, done: true })
                 });
             }
             else {
-                api.post('room/tracks/add' + type, { track_ids: this.state.selected }, (status, data) => {
+                api.post('room/tracks/add', { track_ids: this.state.selected }, (status, data) => {
                     if (status == 201) {
                         this.setState({ ...this.state, wait: false, done: true })
                     }

@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import Header from "./header.js";
 import { UserItem } from "./user.js";
 import { Link, Route, Redirect } from "wouter";
-import css from "./roomPreview.css";
+import css from "./common.css";
 
 class RoomPreview extends React.Component {
     constructor(props) {

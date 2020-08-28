@@ -11,10 +11,18 @@ class Header extends React.Component {
     }
     showOpts() {
         if (!this.props.blank) {
-            return (<div id="hd_opts" className="hstack space-around">
-                <Link className="hd_opt" href="/joinroom">Join room</Link>
-                <Link className="hd_opt" href="/account">Account</Link>
-            </div>)
+            if (!this.props.roomControls)
+                return (<div id="hd_opts" className="hstack space-around">
+                    <a className="hd_opt" href="/joinroom">Join room</a>
+                    <Link className="hd_opt" href="/account">Account</Link>
+                </div>)
+            else
+                return (<div id="hd_opts" className="hstack space-around">
+                    <Link className="hd_opt" href="/room/access">Access</Link>
+                    <div className="hd_opt red_opt" onClick={() => { window.state.leaveRoom() }}>
+                        &nbsp;LEAVE&nbsp;
+                    </div>
+                </div>)
         }
         else {
             return (<div></div>)

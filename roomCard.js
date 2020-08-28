@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { UserLink } from "./user.js";
 import { Link, Route } from "wouter";
 import css from "./roomCard.css";
+import sharedCss from "./common.css";
 
 class RoomCard extends React.Component {
     constructor(props) {
@@ -56,7 +57,7 @@ class RoomCard extends React.Component {
             <div className={css.hero}></div>
             <div className={css.txt + " ink-grey size-xs base-semilight"}>{this.gettxt()}</div>
             <div className="center">
-                <Link href={'/roomPreview/' + this.props.room_id} className={css.joinbutt + " center"}>Join</Link>
+                <Link href={'/roomPreview/' + this.props.room_id} className={sharedCss.redButt_s + " center"}>Join</Link>
             </div>
         </div>)
     }

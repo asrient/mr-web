@@ -135,6 +135,16 @@ var state = {
                 cb(false)
             }
         })
+    },
+    removeTrack: function (roomtrackId, cb = function () { }) {
+        api.post('room/tracks/remove', { roomtrack_ids: [roomtrackId] }, (status, data) => {
+            if (status == 201) {
+                cb(true)
+            }
+            else {
+                cb(false)
+            }
+        })
     }
 }
 

@@ -17,19 +17,6 @@
     padding: 0.7rem;
     text-align: center;
 }
-.joinbutt{
-    padding: 0.2rem 3rem;
-    background-color: rgb(184, 0, 0);
-    border-radius: 0.2rem;
-    -webkit-user-select: none;
-    font-size: 1rem;
-    color:white;
-    font-weight: 600;
-    cursor: pointer;
-}
-.joinbutt:hover{
-    background-color: rgb(243, 0, 0);
-}
 @media(max-width:900px){
     .container{
         height: 17rem;

@@ -14,8 +14,18 @@ class TrackItem extends React.Component {
             this.props.onClick(this.props.track_id)
         }
     }
+    duration() {
+        
+            if (!this.props.playing)
+                return (<div className={css.duration}>{this.props.duration}</div>)
+        
+    }
     render() {
-        return (<div className={css.trackContainer}>
+        var contCls = css.trackContainer;
+        if (this.props.playing) {
+            contCls += ' ' + css.playing
+        }
+        return (<div className={contCls}>
             <div className={css.content}>
                 <div onClick={this.click} className={css.art}></div>
                 <div>
@@ -23,8 +33,8 @@ class TrackItem extends React.Component {
                     <div className={css.artists + " ink-grey base-light"}>{this.props.artists}</div>
                 </div>
             </div>
-            <div style={{alignItems: 'center', display: 'flex'}}>
-            <div className={css.duration}>{this.props.duration}</div>
+            <div style={{ alignItems: 'center', display: 'flex' }}>
+                {this.duration()}
                 {this.props.children}
             </div>
         </div>)
