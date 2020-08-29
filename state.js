@@ -206,7 +206,7 @@ var state = {
         var st = store.getState();
         if (st.room.tracks) {
             var index = st.room.tracks.findIndex((rt) => { return rt.roomtrack_id == track.roomtrack_id })
-            if (index) {
+            if (index >= 0) {
                 st.room.tracks.splice(index, 1)
                 update(st)
             }
@@ -222,6 +222,8 @@ var state = {
             var alreadyThere = st.room.members[grp].find((member) => { return member.user_id == user.user_id })
             if (!alreadyThere) {
                 st.room.members[grp].push(user)
+                st.room.members_count++;
+                console.log(user, 'joined', grp, st.room.members)
                 update(st)
             }
         }
@@ -229,8 +231,10 @@ var state = {
     removeRoomMember: function (user) {
         var look = (grp) => {
             var index = st.room.members[grp].findIndex((member) => { return member.user_id == user.user_id })
-            if (index) {
+            if (index >= 0) {
                 st.room.members[grp].splice(index, 1)
+                st.room.members_count--;
+                console.log(user, 'left', grp, index)
                 update(st)
                 return true;
             }
