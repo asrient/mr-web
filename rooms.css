@@ -5,16 +5,15 @@
 .item{
     padding: 3rem 1rem;
 }
-#createSec{
-    padding: 1.2rem;
-    min-height: 16rem;
-    max-width: 54rem;
-    margin-top:2rem;
+#friendsHero{
+    margin-top:1rem;
+    max-height: 7rem;
+    width:auto;
+    max-width: 100%;
+    object-fit: contain;
+    -webkit-user-select: none;
 }
 @media(max-width:900px){
-    #createSec{
-        margin-top:0px;
-    }
     #grid{
         display: block;
     }

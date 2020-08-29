@@ -44,6 +44,9 @@ var RoomRequired = (prams) => {
         return (<Redirect to='/rooms' />)
     }
 }
+var RoomMembers = (prams) => {
+        return (<RoomPreview room_id={state.getState().room.room_id} />)
+}
 
 ReactDOM.render(
     <Switch>
@@ -87,9 +90,7 @@ ReactDOM.render(
         <Route path="/room/members">
             <LoginRequired>
                 <RoomRequired>
-                    {params => {
-                        return (<RoomPreview room_id={state.getState().room.room_id} />)
-                    }}
+                    <RoomMembers/>
                 </RoomRequired>
             </LoginRequired>
         </Route>

@@ -26,10 +26,20 @@ opacity: 0.7rem;
     margin-bottom: 0px;
     margin-left:0px;
 }
+.playable{
+    -webkit-user-select: none;
+}
 .content{
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+}
+.playable .content{
+    cursor: pointer;
+}
+.playable .content:hover{
+    opacity: 0.7;
+    color:rgba(0, 255, 0, 0.664)!important;
 }
 .title{
     font-size: 1.1rem;
@@ -60,4 +70,11 @@ font-weight: 500;
 .playing .art{
     height: 5rem;
     width: 5rem;
+}
+.playButt{
+    margin:0px;
+    opacity: 0.5rem;
+    box-shadow: 0 0 4px 3px #00000042;
+    border-radius: 100%;
+    padding: 0.2rem;
 }

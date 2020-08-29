@@ -15,21 +15,32 @@ class TrackItem extends React.Component {
         }
     }
     duration() {
-        
-            if (!this.props.playing)
-                return (<div className={css.duration}>{this.props.duration}</div>)
-        
+
+        if (!this.props.playing)
+            return (<div className={css.duration}>{this.props.duration}</div>)
+
+    }
+    playButt(){
+        if (this.props.playable) {
+            return(<img className={css.playButt+' icon size-m'} src='/static/icons/play.png' />)
+        }
+        else{
+            return(<div></div>)
+        }
     }
     render() {
         var contCls = css.trackContainer;
         if (this.props.playing) {
             contCls += ' ' + css.playing
         }
+        if (this.props.playable) {
+            contCls += ' ' + css.playable
+        }
         return (<div className={contCls}>
-            <div className={css.content}>
-                <div onClick={this.click} className={css.art}></div>
+            <div className={'ink-white ' + css.content} onClick={this.click}>
+                <div className={css.art+' center'}>{this.playButt()}</div>
                 <div>
-                    <div onClick={this.click} className={css.title + " ink-white base-semilight"}>{this.props.title}</div>
+                    <div className={css.title + " base-semilight"}>{this.props.title}</div>
                     <div className={css.artists + " ink-grey base-light"}>{this.props.artists}</div>
                 </div>
             </div>
