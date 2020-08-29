@@ -1,6 +1,7 @@
 import $ from "jquery";
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
+import Toasts from "./toasts.js";
 import Rooms from "./rooms.js";
 import Room from "./room.js";
 import FriendRequests from "./FriendRequests.js";
@@ -48,7 +49,8 @@ var RoomMembers = (prams) => {
         return (<RoomPreview room_id={state.getState().room.room_id} />)
 }
 
-ReactDOM.render(
+ReactDOM.render(<div>
+    <Toasts/>
     <Switch>
         <Route path="/rooms"><Rooms /></Route>
         <Route path="/createRoom">
@@ -112,7 +114,7 @@ ReactDOM.render(
         </Route>
         <Route>404, Not Found!</Route>
     </Switch>
-    , document.getElementById('root')
+    </div>, document.getElementById('root')
 );
 
 

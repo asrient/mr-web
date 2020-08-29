@@ -77,7 +77,7 @@ class FriendRequests extends React.Component {
                 }
                 counter++;
                 if(counter>=ids.length){
-                    //all done
+                    window.state.toast('Saved','/friends')
                     this.setState({ ...this.state, wait: false, done: true })
                 }
             })

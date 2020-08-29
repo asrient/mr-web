@@ -61,9 +61,11 @@ class AddTracks extends React.Component {
             else {
                 api.post('room/tracks/add', { track_ids: this.state.selected }, (status, data) => {
                     if (status == 201) {
+                        window.state.toast('Tracks added successfully','/room')
                         this.setState({ ...this.state, wait: false, done: true })
                     }
                     else {
+                        window.state.toast('Could not add tracks','/room')
                         console.error(status, data)
                         if (status == 400) {
                             this.setState({ ...this.state, wait: false, selected: [] })
