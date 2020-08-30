@@ -16,7 +16,7 @@ function reducers(state = 0, action) {
             if (window.initialState.is_loggedin) {
                 MY_ID = window.initialState.me.user_id
             }
-            var st = { ...window.initialState, toasts: [], showAutoplayBanner:false }
+            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false }
             return st;
         }
         case 'UPDATE': {
@@ -35,11 +35,11 @@ function update(st) {
 
 
 class Live {
-    socket = null;
-    isConnected = false;
-    no_retries = 0;
-    MAX_RETRIES = 5;
     constructor() {
+        this.socket = null;
+        this.isConnected = false;
+        this.no_retries = 0;
+        this.MAX_RETRIES = 5;
         this.connect()
     }
     connect = () => {
@@ -48,7 +48,7 @@ class Live {
         this.isConnected = false;
         var hostUrl = window.location.hostname;
         var protocol = 'wss://'
-        if (hostUrl == 'localhost') {
+        if (hostUrl == 'localhost' || hostUrl.split('.')[0] == '192') {
             hostUrl += ':8000'
             protocol = 'ws://'
         }
@@ -88,6 +88,7 @@ class Live {
     }
     _onError = (event) => {
         console.error('connection error!', event)
+        state.toast('Connection error')
     }
     _onMessage = (event) => {
         var data = JSON.parse(event.data);
@@ -187,18 +188,16 @@ class Live {
 var socket = null;
 
 class Playback {
-    hls = null;
-    player = null;
-    state = {
-        url: null,
-        track_id: null,
-        started_on: null,
-        sleek: 0,
-        is_playing: false,
-        can_play: true,
-        is_loaded: false
-    }
     constructor(track_id, url, sleek = 0, canPlay = true) {
+        this.state = {
+            url: null,
+            track_id: null,
+            started_on: null,
+            sleek: 0,
+            is_playing: false,
+            can_play: true,
+            is_loaded: false
+        }
         this.state.url = url
         this.state.track_id = track_id
         this.state.sleek = sleek
@@ -282,9 +281,9 @@ var state = {
             this.changeRoom(st.room)
         }
     },
-    closeAutoplayBanner(){
+    closeAutoplayBanner() {
         var st = store.getState();
-        st.showAutoplayBanner=false;
+        st.showAutoplayBanner = false;
         update(st)
     },
     popToast: function (key) {
@@ -333,6 +332,9 @@ var state = {
                     this.player = null
                 }
             }
+        }
+        else {
+            this.toast('Streaming not supported on this device')
         }
     },
     updatePlayback: function (roomState) {
