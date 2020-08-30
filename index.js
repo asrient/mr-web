@@ -68,8 +68,8 @@ class AutoplayBanner extends React.Component {
         this.unsub();
     }
     ok=()=>{
-        window.player.play()
         state.closeAutoplayBanner()
+        state.syncPlayback()
     }
     render() {
         if(this.state.show){
@@ -79,7 +79,7 @@ class AutoplayBanner extends React.Component {
                         Play room music?
                     </div>
                     <br/>
-                    <div onClick={this.ok} className='redButt center'>Play</div>
+                    <div onClick={this.ok} className={'redButt center '+css.ap_butt}>Play</div>
                 </div>
             </div>)
         }

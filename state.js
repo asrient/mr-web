@@ -234,6 +234,7 @@ class Playback {
             }).catch(error => {
                 // Autoplay was prevented.
                 // Show a "Play" button so that user can start playback.
+                this.state.is_playing = false
                 var st = state.getState()
                 st.showAutoplayBanner = true
                 update(st)

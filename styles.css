@@ -47,3 +47,6 @@
   background-color: rgba(32, 32, 32, 0.733);
   border-radius: 0.3rem;
 }
+.ap_butt{
+max-width: 80vw;
+}
