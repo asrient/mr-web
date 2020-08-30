@@ -4,7 +4,9 @@ var toastCounter = 0;
 const TOAST_DURATION = 2500;
 
 var MY_ID = null;
-const PLAYBACK_SUPPORT = Hls.isSupported()
+const PLAYBACK_SUPPORT = Hls.isSupported() || iOSSafari
+
+var isFirstPlay=true;
 
 function time() {
     return new Date().getTime() / 1000
@@ -204,10 +206,16 @@ class Playback {
         this.state.can_play = canPlay
         this.hls = new Hls();
         this.player = window.player;
-        this.hls.attachMedia(this.player);
-        this.hls.on(Hls.Events.MANIFEST_PARSED, this._onPlaylistLoaded);
-        this.hls.on(Hls.Events.ERROR, this._onError);
-        this.hls.on(Hls.Events.MEDIA_ATTACHED, this.loadUrl)
+        if (iOSSafari) {
+            this.player.src = this.state.url;
+            this._onPlaylistLoaded()
+        }
+        else {
+            this.hls.attachMedia(this.player);
+            this.hls.on(Hls.Events.MANIFEST_PARSED, this._onPlaylistLoaded);
+            this.hls.on(Hls.Events.ERROR, this._onError);
+            this.hls.on(Hls.Events.MEDIA_ATTACHED, this.loadUrl)
+        }
     }
     kill() {
         this.hls.destroy();
@@ -229,7 +237,13 @@ class Playback {
         var promise = this.player.play();
         if (promise !== undefined) {
             promise.then(_ => {
-                // Autoplay started!
+                if (iOSSafari&&isFirstPlay) {
+                    //cuz in ios it always starts from the begining
+                    isFirstPlay=false
+                    window.setTimeout(()=>{
+                        state.syncPlayback()
+                    },200)
+                }
             }).catch(error => {
                 // Autoplay was prevented.
                 // Show a "Play" button so that user can start playback.
@@ -242,10 +256,10 @@ class Playback {
     }
     pause() {
         this.state.can_play = false
-        this.player.pause();
         this.state.is_playing = false
         this.state.started_on = time()
         this.state.sleek = this.player.currentTime
+        this.player.pause();
     }
     _onPlaylistLoaded = (e, data) => {
         this.state.started_on = time()
@@ -267,6 +281,39 @@ class Playback {
         }
     }
 }
+
+window.player.addEventListener('loadedmetadata', (event) => {
+    //mainly needed for ios to check for plist loaded
+    if (iOSSafari) {
+        state.syncPlayback()
+    }
+});
+
+/*
+//this makes plaback go crazy
+//apperantly hls seeks thes track ever now and then which causes this event to fire
+window.player.addEventListener('seeked', (event) => {
+    console.log('seeked', event)
+    state.syncPlayback()
+});
+*/
+
+window.player.addEventListener('play', (event) => {
+    if (state.player) {
+        if (!state.player.state.is_playing){
+            state.play()
+        }
+    }
+});
+
+window.player.addEventListener('pause', (event) => {
+    if (state.player) {
+        if (state.player.state.is_playing){
+            state.pause()
+        }
+    }
+});
+
 var state = {
     getState: store.getState,
     subscribe: store.subscribe,
