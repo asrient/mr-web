@@ -137,6 +137,41 @@ class Live {
                 }
                 break;
             }
+            case 'update.playback.pause': {
+                state.updatePlayback(data.room)
+                var name = user.name
+                if (user.user_id == MY_ID) {
+                    name = 'You'
+                }
+                state.toast(name + ' paused the music', '/room')
+                break;
+            }
+            case 'update.playback.skipto': {
+                var oldTrack=state.getState().room.current_roomtrack
+                var wasPaused=state.getState().room.is_paused
+                state.updatePlayback(data.room)
+                var track = data.room.current_roomtrack
+                if (user) {
+                    var name = user.name
+                    if (user.user_id == MY_ID) {
+                        name = 'You'
+                    }
+                    var txt=name + ' changed the track to ' + track.title
+                    if(oldTrack.roomtrack_id==track.roomtrack_id){
+                        if(wasPaused&&!data.room.is_paused){
+                            txt=name+' resumed music'
+                        }
+                        else{
+                            txt=name+' seeked the track'
+                        }
+                    }
+                    state.toast(txt, '/room')
+                }
+                else{
+                    state.toast('Now playing ' + track.title, '/room')
+                }
+                break;
+            }
             default: {
                 console.debug('unknown live msg', data);
             }
@@ -190,7 +225,13 @@ var state = {
     syncPlayback: function () {
         var st = store.getState();
         console.log('Syncing playback..')
+    },
+    updatePlayback: function (roomState) {
+        var st = store.getState();
+        var room = { ...st.room, ...roomState }
+        st.room = room
         update(st)
+        this.syncPlayback()
     },
     addRoomtrack: function (track) {
         var st = store.getState();
@@ -360,18 +401,26 @@ var state = {
             }
         }
     },
+    play() {
+        var st = store.getState();
+        if (st.room) {
+            if (st.room.is_paused) {
+                socket.send('set.playback.play')
+            }
+        }
+    },
     pause() {
         var st = store.getState();
         if (st.room) {
             if (!st.room.is_paused) {
-                //send to channel
+                socket.send('set.playback.pause')
             }
         }
     },
-    skipTo(roomtrackId, durationToComplete) {
+    skipTo(roomtrackId, duration = null) {
         var st = store.getState();
         if (st.room) {
-            //
+            socket.send('set.playback.skipto', { roomtrack_id: roomtrackId, duration })
         }
     }
 }

@@ -51,7 +51,9 @@ class Queue extends React.Component {
             }
             var list = []
             arranged.forEach(track => {
-                list.push(<TrackItem playable key={track.roomtrack_id} {...track} >
+                list.push(<TrackItem onClick={()=>{
+                    window.state.skipTo(track.roomtrack_id)
+                }} playable key={track.roomtrack_id} {...track} >
                     <div className={css.delButt + ' center'} onClick={() => {
                         window.state.removeTrack(track.roomtrack_id)
                     }}>
@@ -123,12 +125,16 @@ class Room extends React.Component {
     playButton() {
         if (this.state.room) {
             if (this.state.room.is_paused) {
-                return (<div className={css.playCircle + " center"}>
+                return (<div onClick={()=>{
+                    window.state.play()
+                }} className={css.playCircle + " center"}>
                     <img className={"icon clickable"} src="/static/icons/play.png" />
                 </div>)
             }
             else {
-                return (<div className={css.playCircle + " center"}>
+                return (<div onClick={()=>{
+                    window.state.pause()
+                }} className={css.playCircle + " center"}>
                     <img className={"icon clickable"} src="/static/icons/pause.png" />
                 </div>)
             }

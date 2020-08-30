@@ -7,6 +7,12 @@
   max-width: 20rem;
   padding: 0.5rem 0.7rem;
 }
+.mr_title{
+  padding-bottom: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 200;
+  color:rgba(255, 255, 255, 0.466);
+}
 @keyframes show {
   from {
     transform: scale(0.8);
