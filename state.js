@@ -16,7 +16,7 @@ function reducers(state = 0, action) {
             if (window.initialState.is_loggedin) {
                 MY_ID = window.initialState.me.user_id
             }
-            var st = { ...window.initialState, toasts: [] }
+            var st = { ...window.initialState, toasts: [], showAutoplayBanner:false }
             return st;
         }
         case 'UPDATE': {
@@ -213,7 +213,7 @@ class Playback {
     kill() {
         this.hls.destroy();
     }
-    loadUrl=()=> {
+    loadUrl = () => {
         this.hls.loadSource(this.state.url);
     }
     play(sleek = null) {
@@ -225,9 +225,20 @@ class Playback {
         this.state.is_playing = true
         var currTime = time()
         var timePassed = currTime - this.state.started_on;
-        console.log('curr sleek',timePassed,this.state.sleek)
+        console.log('curr sleek', this.state.sleek)
         this.player.currentTime = timePassed + this.state.sleek
-        this.player.play();
+        var promise = this.player.play();
+        if (promise !== undefined) {
+            promise.then(_ => {
+                // Autoplay started!
+            }).catch(error => {
+                // Autoplay was prevented.
+                // Show a "Play" button so that user can start playback.
+                var st = state.getState()
+                st.showAutoplayBanner = true
+                update(st)
+            });
+        }
     }
     pause() {
         this.state.can_play = false
@@ -236,13 +247,13 @@ class Playback {
         this.state.started_on = time()
         this.state.sleek = this.player.currentTime
     }
-    _onPlaylistLoaded=(e, data)=> {
+    _onPlaylistLoaded = (e, data) => {
         this.state.started_on = time()
         this.state.is_loaded = true
         if (this.state.can_play)
             this.play();
     }
-    _onError=(e, data)=> {
+    _onError = (e, data) => {
         var errorType = data.type;
         var errorDetails = data.details;
         var errorFatal = data.fatal;
@@ -269,6 +280,11 @@ var state = {
         if (st.room) {
             this.changeRoom(st.room)
         }
+    },
+    closeAutoplayBanner(){
+        var st = store.getState();
+        st.showAutoplayBanner=false;
+        update(st)
     },
     popToast: function (key) {
         var st = store.getState();
@@ -297,10 +313,10 @@ var state = {
                 var roomtrack = st.room.current_roomtrack
                 var sleek = roomtrack.duration - st.room.duration_to_complete + (time() - (new Date(st.room.play_start_time).getTime() / 1000))
                 if (this.player && this.player.state.track_id == roomtrack.track_id) {
-                    if(!st.room.is_paused)
-                    this.player.play(sleek)
+                    if (!st.room.is_paused)
+                        this.player.play(sleek)
                     else
-                    this.player.pause()
+                        this.player.pause()
                 }
                 else {
                     if (this.player) {

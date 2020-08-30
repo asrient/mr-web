@@ -11,7 +11,7 @@ import AddTracks from "./addTracks.js";
 import RoomAccess from "./roomAccess.js";
 import Profile from "./profile.js";
 import { Switch, Route, Redirect } from "wouter";
-import "./styles.css";
+import css from "./styles.css";
 import state from "./state.js";
 
 window.api = new window.Api()
@@ -49,8 +49,49 @@ var RoomMembers = (prams) => {
         return (<RoomPreview room_id={state.getState().room.room_id} />)
 }
 
+class AutoplayBanner extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { show:false }
+    }
+    componentDidMount() {
+        this.parseState();
+        this.unsub = window.state.subscribe(() => {
+            this.parseState();
+        })
+    }
+    parseState() {
+        var st = window.state.getState();
+            this.setState({ ...this.state, show:st.showAutoplayBanner })
+    }
+    componentWillUnmount() {
+        this.unsub();
+    }
+    ok=()=>{
+        window.player.play()
+        state.closeAutoplayBanner()
+    }
+    render() {
+        if(this.state.show){
+            return(<div id={css.ap_screen} className='center'>
+                <div id={css.ap_box} className='center-col'>
+                    <div className='size-m ink-white base-regular'>
+                        Play room music?
+                    </div>
+                    <br/>
+                    <div onClick={this.ok} className='redButt center'>Play</div>
+                </div>
+            </div>)
+        }
+        else{
+            return null
+        }
+    }
+}
+
 ReactDOM.render(<div>
     <Toasts/>
+    <AutoplayBanner/>
     <Switch>
         <Route path="/rooms"><Rooms /></Route>
         <Route path="/createRoom">
