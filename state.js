@@ -4,6 +4,11 @@ var toastCounter = 0;
 const TOAST_DURATION = 2500;
 
 var MY_ID = null;
+const PLAYBACK_SUPPORT = Hls.isSupported()
+
+function time() {
+    return new Date().getTime() / 1000
+}
 
 function reducers(state = 0, action) {
     switch (action.type) {
@@ -27,15 +32,6 @@ let store = createStore(reducers);
 function update(st) {
     store.dispatch({ type: 'UPDATE', state: st });
 }
-
-/*
-var playbackState={
-    url:'/audio/1.m3u8',
-    id:567,
-    started_on:45678779,
-    sleek:120
-}
-*/
 
 
 class Live {
@@ -147,8 +143,8 @@ class Live {
                 break;
             }
             case 'update.playback.skipto': {
-                var oldTrack=state.getState().room.current_roomtrack
-                var wasPaused=state.getState().room.is_paused
+                var oldTrack = state.getState().room.current_roomtrack
+                var wasPaused = state.getState().room.is_paused
                 state.updatePlayback(data.room)
                 var track = data.room.current_roomtrack
                 if (user) {
@@ -156,18 +152,18 @@ class Live {
                     if (user.user_id == MY_ID) {
                         name = 'You'
                     }
-                    var txt=name + ' changed the track to ' + track.title
-                    if(oldTrack.roomtrack_id==track.roomtrack_id){
-                        if(wasPaused&&!data.room.is_paused){
-                            txt=name+' resumed music'
+                    var txt = name + ' changed the track to ' + track.title
+                    if (oldTrack.roomtrack_id == track.roomtrack_id) {
+                        if (wasPaused && !data.room.is_paused) {
+                            txt = name + ' resumed music'
                         }
-                        else{
-                            txt=name+' seeked the track'
+                        else {
+                            txt = name + ' seeked the track'
                         }
                     }
                     state.toast(txt, '/room')
                 }
-                else{
+                else {
                     state.toast('Now playing ' + track.title, '/room')
                 }
                 break;
@@ -190,9 +186,80 @@ class Live {
 
 var socket = null;
 
+class Playback {
+    hls = null;
+    player = null;
+    state = {
+        url: null,
+        track_id: null,
+        started_on: null,
+        sleek: 0,
+        is_playing: false,
+        can_play: true,
+        is_loaded: false
+    }
+    constructor(track_id, url, sleek = 0, canPlay = true) {
+        this.state.url = url
+        this.state.track_id = track_id
+        this.state.sleek = sleek
+        this.state.can_play = canPlay
+        this.hls = new Hls();
+        this.player = window.player;
+        this.hls.attachMedia(this.player);
+        this.hls.on(Hls.Events.MANIFEST_PARSED, this._onPlaylistLoaded);
+        this.hls.on(Hls.Events.ERROR, this._onError);
+        this.hls.on(Hls.Events.MEDIA_ATTACHED, this.loadUrl)
+    }
+    kill() {
+        this.hls.destroy();
+    }
+    loadUrl=()=> {
+        this.hls.loadSource(this.state.url);
+    }
+    play(sleek = null) {
+        if (sleek) {
+            this.state.started_on = time()
+            this.state.sleek = sleek
+        }
+        this.state.can_play = true
+        this.state.is_playing = true
+        var currTime = time()
+        var timePassed = currTime - this.state.started_on;
+        console.log('curr sleek',timePassed,this.state.sleek)
+        this.player.currentTime = timePassed + this.state.sleek
+        this.player.play();
+    }
+    pause() {
+        this.state.can_play = false
+        this.player.pause();
+        this.state.is_playing = false
+        this.state.started_on = time()
+        this.state.sleek = this.player.currentTime
+    }
+    _onPlaylistLoaded=(e, data)=> {
+        this.state.started_on = time()
+        this.state.is_loaded = true
+        if (this.state.can_play)
+            this.play();
+    }
+    _onError=(e, data)=> {
+        var errorType = data.type;
+        var errorDetails = data.details;
+        var errorFatal = data.fatal;
+
+        switch (data.details) {
+            case Hls.ErrorDetails.FRAG_LOAD_ERROR:
+                // ....
+                break;
+            default:
+                break;
+        }
+    }
+}
 var state = {
     getState: store.getState,
     subscribe: store.subscribe,
+    player: null,
     init: function () {
         if (window.initialState.is_loggedin) {
             socket = new Live()
@@ -223,8 +290,33 @@ var state = {
         }, TOAST_DURATION)
     },
     syncPlayback: function () {
-        var st = store.getState();
-        console.log('Syncing playback..')
+        if (PLAYBACK_SUPPORT) {
+            var st = store.getState();
+            console.log('Syncing playback..')
+            if (st.room) {
+                var roomtrack = st.room.current_roomtrack
+                var sleek = roomtrack.duration - st.room.duration_to_complete + (time() - (new Date(st.room.play_start_time).getTime() / 1000))
+                if (this.player && this.player.state.track_id == roomtrack.track_id) {
+                    if(!st.room.is_paused)
+                    this.player.play(sleek)
+                    else
+                    this.player.pause()
+                }
+                else {
+                    if (this.player) {
+                        this.player.kill()
+                        this.player = null
+                    }
+                    this.player = new Playback(roomtrack.track_id, roomtrack.playback_url, sleek, !st.room.is_paused)
+                }
+            }
+            else {
+                if (this.player) {
+                    this.player.kill()
+                    this.player = null
+                }
+            }
+        }
     },
     updatePlayback: function (roomState) {
         var st = store.getState();
