@@ -36,9 +36,13 @@ class TrackItem extends React.Component {
         if (this.props.playable) {
             contCls += ' ' + css.playable
         }
+        var artStyles={}
+        if(this.props.image_url){
+            artStyles['backgroundImage']='url('+this.props.image_url+')';
+        }
         return (<div className={contCls}>
             <div className={'ink-white ' + css.content} onClick={this.click}>
-                <div className={css.art+' center'}>{this.playButt()}</div>
+                <div className={css.art+' center'} style={artStyles}>{this.playButt()}</div>
                 <div>
                     <div className={css.title + " base-semilight trunc"}>{this.props.title}</div>
                     <div className={css.artists + " ink-grey base-light trunc"}>{this.props.artists}</div>
