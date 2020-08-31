@@ -57,7 +57,7 @@ class Queue extends React.Component {
                     <div className={css.delButt + ' center'} onClick={() => {
                         window.state.removeTrack(track.roomtrack_id)
                     }}>
-                        <img className={"icon " + css.trashIcon} src="/static/icons/trash.png" />
+                        <img className={"icon " + css.trashIcon} style={{fontSize:'0.5rem'}} src="/static/icons/close.svg" />
                     </div>
                 </TrackItem>)
             });
@@ -203,7 +203,7 @@ class Room extends React.Component {
                 <div id={css.main}>
                     <div id={css.p1}>
                         <div style={{ height: '23rem' }}></div>
-                        <div style={{ padding: '1.2rem 2rem', maxWidth: '30rem' }} className='container ink-grey base-light size-xs'>
+                        <div style={{ padding: '1.2rem 2rem', maxWidth: '30rem' }} className='container ink-grey base-light size-s'>
                             {this.txt()}
                         </div>
                     </div>

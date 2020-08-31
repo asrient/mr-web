@@ -27,12 +27,11 @@ class Header extends React.Component {
         else {
             return (<div></div>)
         }
-
     }
     render() {
         return (<>
             <div id="header">
-                <a id="hd_hero" href="/"><img id="hd_mrIcon" src="/static/icons/mr.png" /></a>
+                <Link id="hd_hero" href="/rooms"><img style={{marginLeft:'0.6rem'}} id="hd_mrIcon" src="/static/icons/mr.png" /></Link>
                 {this.showOpts()}
             </div>
             <div id="hd_space"></div>
