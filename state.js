@@ -6,7 +6,7 @@ const TOAST_DURATION = 2500;
 var MY_ID = null;
 const PLAYBACK_SUPPORT = Hls.isSupported() || iOSSafari
 
-var isFirstPlay=true;
+var isFirstPlay = true;
 
 function time() {
     return new Date().getTime() / 1000
@@ -237,12 +237,12 @@ class Playback {
         var promise = this.player.play();
         if (promise !== undefined) {
             promise.then(_ => {
-                if (iOSSafari&&isFirstPlay) {
+                if (iOSSafari && isFirstPlay) {
                     //cuz in ios it always starts from the begining
-                    isFirstPlay=false
-                    window.setTimeout(()=>{
+                    isFirstPlay = false
+                    window.setTimeout(() => {
                         state.syncPlayback()
-                    },200)
+                    }, 200)
                 }
             }).catch(error => {
                 // Autoplay was prevented.
@@ -300,7 +300,7 @@ window.player.addEventListener('seeked', (event) => {
 
 window.player.addEventListener('play', (event) => {
     if (state.player) {
-        if (!state.player.state.is_playing){
+        if (!state.player.state.is_playing) {
             state.play()
         }
     }
@@ -308,8 +308,17 @@ window.player.addEventListener('play', (event) => {
 
 window.player.addEventListener('pause', (event) => {
     if (state.player) {
-        if (state.player.state.is_playing){
-            state.pause()
+        if (state.player.state.is_playing) {
+            var st = state.getState()
+            if (window.player.currentTime < st.room.current_roomtrack.duration - 2) {
+                console.log('pausing',window.player.currentTime , st.room.current_roomtrack.duration)
+                state.pause()
+            }
+            else{
+                //usually browser pauses the player after track finished
+                console.warn('Cant pause near end')
+            }
+
         }
     }
 });
