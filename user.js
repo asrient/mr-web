@@ -10,7 +10,7 @@ class UserLink extends React.Component {
         this.state = { }
     }
     render() {
-    return (<Link href={"/profile/"+this.props.user_id} className={css.link+" "+this.props.className}>{this.props.name}</Link>)
+    return (<Link href={"/profile/"+this.props.user_id} className={css.link+' '+this.props.className+' trunc'}>{this.props.name}</Link>)
     }
 }
 
@@ -28,7 +28,7 @@ class UserItem extends React.Component {
                 </Link> 
         </div>
         <div>
-            <Link href={"/profile/"+this.props.user_id} className={css.userName+" ink-white base-semilight"}>{this.props.name}</Link> 
+            <Link href={"/profile/"+this.props.user_id} className={css.userName+" ink-white base-semilight trunc"}>{this.props.name}</Link> 
         </div>
         </div>
      <div>{this.props.children}</div>

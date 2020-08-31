@@ -40,11 +40,11 @@ class TrackItem extends React.Component {
             <div className={'ink-white ' + css.content} onClick={this.click}>
                 <div className={css.art+' center'}>{this.playButt()}</div>
                 <div>
-                    <div className={css.title + " base-semilight"}>{this.props.title}</div>
-                    <div className={css.artists + " ink-grey base-light"}>{this.props.artists}</div>
+                    <div className={css.title + " base-semilight trunc"}>{this.props.title}</div>
+                    <div className={css.artists + " ink-grey base-light trunc"}>{this.props.artists}</div>
                 </div>
             </div>
-            <div style={{ alignItems: 'center', display: 'flex' }}>
+            <div className={css.opts} style={{ alignItems: 'center', display: 'flex' }}>
                 {this.duration()}
                 {this.props.children}
             </div>

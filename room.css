@@ -44,6 +44,7 @@
   grid-template-columns: auto 7rem;
   box-shadow: 0px 3px 6px 4px #00000063;
   overflow: hidden;
+  z-index: 10;
 }
 .playCircle{
     height: 3.2rem;
@@ -54,6 +55,7 @@
     border-radius: 100%;
     cursor: pointer;
     -webkit-user-select: none;
+    z-index: 4;
 }
 .playCircle:hover{
     background-color: rgba(207, 0, 0, 0.795);
