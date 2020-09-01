@@ -9,17 +9,21 @@ import css from "./common.css";
 class AddTracks extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { tracks: null, selected: [], wait: false, done: false }
+        this.state = { tracks: null, selected: [], wait: false, word:null, inputTxt:'', done: false }
     }
     load() {
-        api.get('tracks', null, (status, data) => {
+        var url='tracks'
+        if(this.state.word){
+           url='tracks/search/'+this.state.word
+        }
+        api.get(url, null, (status, data) => {
             if (status == 200) {
                 this.setState({ ...this.state, tracks: data.tracks })
             }
             else {
                 console.error(status, data)
             }
-        })
+        }) 
     }
     componentDidMount() {
         this.load()
@@ -92,6 +96,32 @@ class AddTracks extends React.Component {
             return (<div></div>)
         }
     }
+    searchBar(){
+        var cls=css.searchBar+' center'
+        return(<div className={cls}>
+            <input autoFocus id={css.search} onChange={(e)=>{
+                var txt=(e.target.value)
+                if(this.state.word&&!txt.trim().length){
+                    this.setState({...this.state,inputTxt:'',word:null,tracks:null},()=>{
+                        this.load()
+                    })
+                }
+                else
+                this.setState({...this.state,inputTxt:txt})
+            }} className="input" value={this.state.inputTxt} placeholder="Search" type="text"></input>
+            <div onClick={()=>{
+                if(this.state.inputTxt&&this.state.inputTxt.length){
+                    var word=(this.state.inputTxt.trim().replace(/ /g,'+'))
+                    this.setState({...this.state,word,tracks:null},()=>{
+                        this.load()
+                    })
+                }
+                else{
+                    this.load()
+                }
+            }} className={css.searchButt+' center size-s'}>🔍</div>
+        </div>)
+    }
     render() {
         if (this.state.done)
             return (<Redirect to="/room" />)
@@ -103,6 +133,7 @@ class AddTracks extends React.Component {
                         Pick your music
                 </div>
                     <br />
+                    {this.searchBar()}
                     {this.tracks()}
                     <br />
                     {this.opt()}

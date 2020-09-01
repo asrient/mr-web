@@ -19,3 +19,24 @@
 .redButt_s:hover{
     background-color: rgb(243, 0, 0);
 }
+.searchBar{
+    padding: 0.6rem;
+    padding-bottom: 1.2rem;
+    display: grid;
+    grid-template-columns: auto 3rem;
+}
+#search{
+    max-width: 80vw;
+    margin-right: 0px;
+}
+.searchButt{
+    height: 2.6rem;
+    width: 100%;
+    background-color: rgb(184, 0, 0);
+    color:white;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+.searchButt:hover{
+    background-color: rgb(253, 0, 0);
+}
