@@ -2,8 +2,11 @@
     height: 7rem;
     width: 7rem;
     margin: 1rem;
-    background-color: rgba(59, 59, 59, 0.486);
+    background-color: rgb(65, 65, 65);
     border-radius: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
 }
 #f_status{
     padding: 0.2rem 1rem;

@@ -29,7 +29,11 @@ class Profile extends React.Component {
     }
 
     avatar() {
-        var html = <div id={css.avatar}></div>
+        var avatarStyle = {}
+        if (this.state.profile&&this.state.profile.avatar_url) {
+            avatarStyle.backgroundImage = 'url(' + this.state.profile.avatar_url + ')'
+        }
+        var html = <div id={css.avatar} style={avatarStyle}></div>
         return html
     }
     name() {
