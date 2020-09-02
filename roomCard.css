@@ -4,10 +4,10 @@
     border:solid thin rgb(42 42 42 / 48%);
     border-radius: 0.2rem;
     padding: 0.5rem;
-    height: 20rem;
+    height: 27rem;
     width: 25rem;
     display: grid;
-    grid-template-rows: 60% 24% 15%;
+    grid-template-rows: auto 3rem 3.5rem;
 }
 .hero{
     padding: 0.5rem;
@@ -19,7 +19,7 @@
 }
 @media(max-width:900px){
     .container{
-        height: 17rem;
+        height: 22rem;
         width: 87vw;
         max-width: 25rem;
     }

@@ -1,7 +1,10 @@
 import { createStore } from 'redux';
+import React, { Component } from "react";
 
 var toastCounter = 0;
+var messageCounter = 0;
 const TOAST_DURATION = 2500;
+const MESSAGE_DURATION = 6000;
 
 var MY_ID = null;
 const PLAYBACK_SUPPORT = Hls.isSupported() || iOSSafari
@@ -18,7 +21,7 @@ function reducers(state = 0, action) {
             if (window.initialState.is_loggedin) {
                 MY_ID = window.initialState.me.user_id
             }
-            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false }
+            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [] }
             return st;
         }
         case 'UPDATE': {
@@ -97,6 +100,10 @@ class Live {
         var type = data.type;
         var user = data.action_user
         switch (type) {
+            case 'chat.text': {
+                state.message(data.date, user, data.text)
+                break;
+            }
             case 'update.members.connected': {
                 if (user.user_id != MY_ID)
                     state.toast(user.name + ' connected', '/room/members')
@@ -311,10 +318,10 @@ window.player.addEventListener('pause', (event) => {
         if (state.player.state.is_playing) {
             var st = state.getState()
             if (window.player.currentTime < st.room.current_roomtrack.duration - 2) {
-                console.log('pausing',window.player.currentTime , st.room.current_roomtrack.duration)
+                console.log('pausing', window.player.currentTime, st.room.current_roomtrack.duration)
                 state.pause()
             }
-            else{
+            else {
                 //usually browser pauses the player after track finished
                 console.warn('Cant pause near end')
             }
@@ -322,6 +329,12 @@ window.player.addEventListener('pause', (event) => {
         }
     }
 });
+
+const sampleMsg = {
+    date: time(),
+    from: { user_id: 1, name: 'Sample User' },
+    text: "Hello everyone!"
+}
 
 var state = {
     getState: store.getState,
@@ -336,6 +349,57 @@ var state = {
         if (st.room) {
             this.changeRoom(st.room)
         }
+    },
+    getTopMessages(getUserIds = false) {
+        var st = store.getState();
+        var msgs = st.messages
+        var top = [];
+        var user_ids = []
+        for (var i = msgs.length - 1; i >= 0; i--) {
+            if (!user_ids.includes(msgs[i].from.user_id)) {
+                top.splice(0, 0, msgs[i])
+                user_ids.push(msgs[i].from.user_id)
+            }
+            if (top.length > 3) {
+                break;
+            }
+        }
+        if (getUserIds)
+            return user_ids
+        return top;
+    },
+    sendMessage(text) {
+        var st = store.getState();
+        if (st.room) {
+            socket.send('chat.text', { text, date: time() })
+        }
+    },
+    message(date, from, text) {
+        var st = store.getState();
+        var key = messageCounter;
+        messageCounter++;
+        st.messages.push({ key, date, from, text })
+        update(st)
+        var loc = window.location.pathname;
+        if (loc != '/room') {
+            this.toast(<div>
+                <div className="base-semibold" style={{fontSize:'0.95rem'}}>
+                    {from.name}
+                </div>
+                <div>
+                    {text}
+                </div>
+            </div>)
+        }
+        window.setTimeout(() => {
+            this.popMessage(key)
+        }, MESSAGE_DURATION)
+    },
+    popMessage(key) {
+        var st = store.getState();
+        var msgs = st.messages.filter((msg) => { return msg.key != key })
+        st.messages = msgs;
+        update(st);
     },
     closeAutoplayBanner() {
         var st = store.getState();
@@ -501,6 +565,7 @@ var state = {
                     st = store.getState();
                     if (st.room != null) {
                         st.room = null;
+                        st.messages = []
                         update(st)
                         this.toast('You left the room')
                         this.syncPlayback()
@@ -518,6 +583,7 @@ var state = {
         room.members = null;
         room.tracks = null;
         st.room = room
+        st.messages = []
         update(st)
         this.syncPlayback()
         this.updateRoomMembers()
@@ -559,14 +625,6 @@ var state = {
                 cb(false)
             }
         })
-    },
-    play() {
-        var st = store.getState();
-        if (st.room) {
-            if (st.room.is_paused) {
-                //send to channel
-            }
-        }
     },
     play() {
         var st = store.getState();

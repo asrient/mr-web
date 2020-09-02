@@ -4,6 +4,7 @@ import { UserLink } from "./user.js";
 import { Link, Route } from "wouter";
 import css from "./roomCard.css";
 import sharedCss from "./common.css";
+import { RoomArt } from "./roomArt.js";
 
 class RoomCard extends React.Component {
     constructor(props) {
@@ -53,8 +54,12 @@ class RoomCard extends React.Component {
         return txt
     }
     render() {
+        var users=this.props.member_friends
+
         return (<div className={css.container}>
-            <div className={css.hero}></div>
+            <div className={css.hero+' center'}>
+            <RoomArt users={users} size={1} />
+            </div>
             <div className={css.txt + " ink-grey size-xs base-semilight"}>{this.gettxt()}</div>
             <div className="center">
                 <Link href={'/roomPreview/' + this.props.room_id} className={sharedCss.redButt_s + " center"}>Join</Link>

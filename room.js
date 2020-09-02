@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import Header from "./header.js";
 import { TrackItem } from "./track.js";
 import { UserLink } from "./user.js";
+import { RoomArt } from "./roomArt.js";
 import { Link, Redirect } from "wouter";
 import css from "./room.css";
 import sharedCss from "./common.css";
@@ -51,13 +52,13 @@ class Queue extends React.Component {
             }
             var list = []
             arranged.forEach(track => {
-                list.push(<TrackItem onClick={()=>{
+                list.push(<TrackItem onClick={() => {
                     window.state.skipTo(track.roomtrack_id)
                 }} playable key={track.roomtrack_id} {...track} >
                     <div className={css.delButt + ' center'} onClick={() => {
                         window.state.removeTrack(track.roomtrack_id)
                     }}>
-                        <img className={"icon " + css.trashIcon} style={{fontSize:'0.5rem'}} src="/static/icons/close.svg" />
+                        <img className={"icon " + css.trashIcon} style={{ fontSize: '0.5rem' }} src="/static/icons/close.svg" />
                     </div>
                 </TrackItem>)
             });
@@ -106,6 +107,42 @@ class Room extends React.Component {
     parseState() {
         var st = window.state.getState();
         if (st.room) {
+            var topIds = []
+            if (st.room.members) {
+                var users = st.room.members.friends.concat(st.room.members.others)
+                var userIds = users.map((user) => {
+                    return user.user_id
+                })
+                if (this.state.room) {
+                    topIds = this.state.room.topUserIds.filter((topId) => {
+                        return userIds.includes(topId)
+                    })
+                }
+                var topMsgIds = window.state.getTopMessages(true)
+                topMsgIds.forEach((msgId) => {
+                    if (!topIds.includes(msgId)) {
+                        if (topIds.length > 6) {
+                            topIds.push(msgId)
+                        }
+                        else {
+                            var randInd = Math.floor(Math.random() * topIds.length)
+                            //replace a random user with this one
+                            topIds[randInd] = msgId
+                        }
+                    }
+                })
+                if (topIds.length < 6 && userIds.length > topIds.length) {
+                    for (var i = 0; i < userIds.length; i++) {
+                        if (!topIds.includes(userIds[i])) {
+                            topIds.push(userIds[i]);
+                        }
+                        if (topIds.length >= 6) {
+                            break;
+                        }
+                    }
+                }
+            }
+            st.room.topUserIds = topIds
             this.setState({ ...this.state, room: st.room })
         }
         else
@@ -125,14 +162,14 @@ class Room extends React.Component {
     playButton() {
         if (this.state.room) {
             if (this.state.room.is_paused) {
-                return (<div onClick={()=>{
+                return (<div onClick={() => {
                     window.state.play()
                 }} className={css.playCircle + " center"}>
                     <img className={"icon clickable"} src="/static/icons/play.png" />
                 </div>)
             }
             else {
-                return (<div onClick={()=>{
+                return (<div onClick={() => {
                     window.state.pause()
                 }} className={css.playCircle + " center"}>
                     <img className={"icon clickable"} src="/static/icons/pause.png" />
@@ -194,6 +231,18 @@ class Room extends React.Component {
             return (<div>Loading</div>)
         }
     }
+    roomArt() {
+        if (this.state.room && this.state.room.members) {
+            var users = this.state.room.members.friends.concat(this.state.room.members.others)
+            var show = users.filter((user) => {
+                return this.state.room.topUserIds.includes(user.user_id)
+            })
+            return (<RoomArt users={show} size={2} />)
+        }
+        else {
+            return (<div className="center">Loading</div>)
+        }
+    }
     render() {
         if (this.state.exit)
             return (<Redirect to='/rooms' />)
@@ -202,9 +251,11 @@ class Room extends React.Component {
                 <Header roomControls />
                 <div id={css.main}>
                     <div id={css.p1}>
-                        <div style={{ height: '23rem' }}></div>
                         <div style={{ padding: '1.2rem 2rem', maxWidth: '30rem' }} className='container ink-grey base-light size-s'>
                             {this.txt()}
+                        </div>
+                        <div className="center" style={{ minHeight: '23rem', maxWidth: '40rem', margin: '0px auto' }}>
+                            {this.roomArt()}
                         </div>
                     </div>
                     <div id={css.p2} className="container">

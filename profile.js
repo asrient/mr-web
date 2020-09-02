@@ -1,6 +1,7 @@
 import $ from "jquery";
 import React, { Component } from "react";
 import Header from "./header.js";
+import {UserCircle} from "./user.js";
 import RoomCard from "./roomCard.js";
 import { Link, Route } from "wouter";
 import css from "./profile.css";
@@ -27,14 +28,12 @@ class Profile extends React.Component {
     componentDidMount() {
         this.load()
     }
-
     avatar() {
-        var avatarStyle = {}
-        if (this.state.profile&&this.state.profile.avatar_url) {
-            avatarStyle.backgroundImage = 'url(' + this.state.profile.avatar_url + ')'
+        var opts={}
+        if (this.state.profile) {
+        opts=this.state.profile
         }
-        var html = <div id={css.avatar} style={avatarStyle}></div>
-        return html
+        return(<UserCircle size="7rem" {...opts} noclick style={{margin:'1rem'}} />)
     }
     name() {
         if (this.state.profile) {
