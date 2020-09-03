@@ -5,6 +5,7 @@ import Toasts from "./toasts.js";
 import Rooms from "./rooms.js";
 import Room from "./room.js";
 import Chat from "./chat.js";
+import Account from "./account.js";
 import FriendRequests from "./FriendRequests.js";
 import Friends from "./friends.js";
 import RoomPreview from "./roomPreview.js";
@@ -100,6 +101,11 @@ ReactDOM.render(<div>
                 <AddTracks action="create-room" />
             </LoginRequired>
         </Route>
+        <Route path="/account">
+            <LoginRequired>
+                <Account />
+            </LoginRequired>
+        </Route>
         <Route path="/friendRequests">
             <LoginRequired>
                 <FriendRequests />
@@ -152,7 +158,7 @@ ReactDOM.render(<div>
                         <Profile user_id={params.id} />
                     </LoginRequired>)
                 else
-                    return (<div>Account - not implemented yet</div>)
+                    return (<Redirect to='/account'/>)
             }}</Route>
         <Route path="/roomPreview/:id">
             {params => {
