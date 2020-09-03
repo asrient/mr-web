@@ -80,7 +80,10 @@ class RoomPreview extends React.Component {
                         if (!this.state.wait) {
                             this.setState({ ...this.state, wait: true })
                             window.state.joinRoom(this.props.room_id, (res) => {
+                                if(res)
                                 this.setState({ ...this.state, wait: false, done: true })
+                                else
+                                this.setState({ ...this.state, wait: false, error: "You don't have access to this room" })
                             });
                         }
                     }}>{txt}</div>
@@ -91,8 +94,14 @@ class RoomPreview extends React.Component {
     }
     main() {
         if (this.state.error) {
-            return (<div className="center container ink-light base-regular size-l" style={{ padding: '3rem 1rem' }}>
+            return (<div className="center-col container ink-light base-regular size-l" style={{ padding: '3rem 1rem' }}>
+                <br/>
+                <br/>
                 {this.state.error}
+                <br/>
+                <br/>
+                    <Link to="/rooms" className="center redButt">Close</Link>
+                <br/>
             </div>)
         }
         else {
