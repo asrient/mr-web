@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import Toasts from "./toasts.js";
 import Rooms from "./rooms.js";
 import Room from "./room.js";
+import Chat from "./chat.js";
 import FriendRequests from "./FriendRequests.js";
 import Friends from "./friends.js";
 import RoomPreview from "./roomPreview.js";
@@ -120,6 +121,13 @@ ReactDOM.render(<div>
             <LoginRequired>
                 <RoomRequired>
                     <Room />
+                </RoomRequired>
+            </LoginRequired>
+        </Route>
+        <Route path="/room/chat">
+            <LoginRequired>
+                <RoomRequired>
+                    <Chat />
                 </RoomRequired>
             </LoginRequired>
         </Route>

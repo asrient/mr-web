@@ -191,6 +191,7 @@ class Room extends React.Component {
                 }
             })
             var txt = []
+            var html=null
             var othersCount = members_count - member_friends.length
             if (othersCount > 0) {
                 //removing urself from the count
@@ -219,14 +220,20 @@ class Room extends React.Component {
             }
             if (txt.length) {
                 txt = ['You are with '].concat(txt)
+                html=(<>
+                <div>{txt}</div>
+                <Link href='/room/chat' className={css.chatButton+' center'}>Chats &nbsp;
+                <img src="/static/icons/expand.png" className="icon" style={{fontSize:'0.7rem'}} />
+                </Link>
+                </>)
             }
             else {
-                txt = (<div className="center-col size-l ink-white">
+                html = (<div className="center-col size-l ink-white">
                     <div style={{ paddingBottom: '0.6rem' }}>Choose who can join you</div>
                     <Link href='/room/access' className={sharedCss.redButt_s + ' center'}>Access</Link>
                 </div>)
             }
-            return txt
+            return html
         }
         else {
             return (<div>Loading</div>)
@@ -252,7 +259,7 @@ class Room extends React.Component {
                 <Header roomControls />
                 <div id={css.main}>
                     <div id={css.p1}>
-                        <div className="center" style={{ minHeight: '23rem', maxWidth: '40rem', margin: '0px auto' }}>
+                        <div className="center" style={{ height: '23rem', maxWidth: '40rem',overflow:'hidden', margin: '0px auto' }}>
                             {this.roomArt()}
                         </div>
                         <div style={{ padding: '1.2rem 2rem', maxWidth: '30rem' }} className='container ink-grey base-light size-s'>

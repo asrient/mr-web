@@ -40,7 +40,10 @@ class ChatBar extends React.Component {
         }
     }
     focused = () => {
-        window.scrollTo(0, 0);
+        if (!this.props.scrollBottom)
+            window.scrollTo(0, 0);
+        else
+            window.scrollTo(0, document.body.scrollHeight);
         this.setState({ ...this.state, isFocused: true })
     }
     blured = () => {

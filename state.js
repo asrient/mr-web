@@ -4,7 +4,7 @@ import React, { Component } from "react";
 var toastCounter = 0;
 var messageCounter = 0;
 const TOAST_DURATION = 2500;
-const MESSAGE_DURATION = 6000;
+const MESSAGE_DURATION = 30000;
 const TYPING_PERIOD = 2200;
 
 var MY_ID = null;
@@ -419,7 +419,7 @@ var state = {
         st.messages.push({ key, date, from, text })
         update(st)
         var loc = window.location.pathname;
-        if (loc != '/room') {
+        if (loc != '/room'&&loc != '/room/chat') {
             this.toast(<div>
                 <div className="base-semibold" style={{ fontSize: '0.95rem' }}>
                     {from.name}
@@ -427,7 +427,7 @@ var state = {
                 <div>
                     {text}
                 </div>
-            </div>)
+            </div>,'/room/chat')
         }
         window.setTimeout(() => {
             this.popMessage(key)
