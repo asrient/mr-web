@@ -9,7 +9,7 @@ import css from "./common.css";
 class RoomAccess extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { friends: null, accessUsers: null, add: [], remove: [], error: null, wait: false, done: false }
+        this.state = { friends: null, accessUsers: null, add: [], remove: [], error: null, wait: false, done: false, code: 'loading..' }
     }
     load() {
         api.get('room/access/users', null, (status, data) => {
@@ -26,6 +26,17 @@ class RoomAccess extends React.Component {
         api.get('friends', null, (status, data) => {
             if (status == 200) {
                 this.setState({ ...this.state, friends: data.friends, error: null })
+            }
+            else {
+                console.error(status, data)
+                if (status == 400) {
+                    this.setState({ ...this.state, error: data.msg })
+                }
+            }
+        })
+        api.get('room/access/code', null, (status, data) => {
+            if (status == 200) {
+                this.setState({ ...this.state, code: data.room_code, error: null })
             }
             else {
                 console.error(status, data)
@@ -131,9 +142,50 @@ class RoomAccess extends React.Component {
             return (<div></div>)
         }
     }
+    codeExport = () => {
+        const url = window.location.protocol + '//' + window.location.host + '/code/' + this.state.code
+        const shareData = {
+            title: 'Music Room Party?',
+            text: "Lets have a party on Music Room! Room code: " + this.state.code + " See you there!",
+            url,
+        }
+        const clipText = url
+        if (navigator.share) {
+            // Web Share API is supported
+            window.navigator.share(shareData).then(() => {
+                state.toast("Room code shared!")
+            })
+                .catch((e) => {
+                    console.error(e)
+                });
+        } else {
+            var promise = navigator.clipboard.writeText(clipText).then(() => {
+                state.toast("Link copied to clipboard")
+            }, () => {
+                state.toast("Failed to copy to clipboard")
+            });
+        }
+    }
+    code() {
+        return (<div>
+            <div style={{ padding: '0.7rem 0.5rem' }} className="ink-light base-semilight size-s">ROOM CODE</div>
+            <div className="center-col" style={{ padding: '0.5rem', paddingBottom: '1.5rem' }}>
+                <div className="ink-grey size-xs base-semilight">
+                    Share this code to give them access to this room
+                    </div>
+                <div className={css.codeBox}>
+                    <div style={{ padding: '0.6rem' }} className="center">{this.state.code}</div>
+                    <div onClick={this.codeExport} className={css.codeExport + ' center'}>
+                        <img className="icon" src="/static/icons/export.svg" style={{ fontSize: '0.9rem' }} />
+                    </div>
+                </div>
+            </div>
+        </div>)
+    }
     users() {
         if (this.state.accessUsers)
             return (<div>
+                {this.code()}
                 {this.friends()}
                 {this.others()}
             </div>)
@@ -163,13 +215,13 @@ class RoomAccess extends React.Component {
         this.post('grant', add, () => {
             a1 = true
             if (a1 && a2) {
-                this.setState({ ...this.state, done:true})
+                this.setState({ ...this.state, done: true })
             }
         })
         this.post('revoke', remove, () => {
             a2 = true
             if (a1 && a2) {
-                this.setState({ ...this.state, done:true})
+                this.setState({ ...this.state, done: true })
             }
         })
     }
@@ -212,13 +264,13 @@ class RoomAccess extends React.Component {
         }
     }
     render() {
-        if(this.state.done)
-        return (<Redirect to="/room"/>)
+        if (this.state.done)
+            return (<Redirect to="/room" />)
         else
-        return (<>
-            <Header blank />
-            {this.main()}
-        </>)
+            return (<>
+                <Header blank />
+                {this.main()}
+            </>)
     }
 }
 

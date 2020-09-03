@@ -40,3 +40,26 @@
 .searchButt:hover{
     background-color: rgb(253, 0, 0);
 }
+.codeBox{
+    margin:0.5rem auto;
+    font-size: 0.9rem;
+    font-weight: 200;
+    color:rgb(201, 201, 201);
+    background-color: rgba(20, 20, 20, 0.836);
+    width: 20rem;
+    max-width: 85vw;
+    border-bottom:solid 3px rgb(199, 0, 0);
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 3rem;
+}
+.codeExport{
+    background-color: rgb(184, 0, 0);
+    width: 100%;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.codeExport:hover{
+    background-color: rgba(228, 0, 0, 0.836);
+}

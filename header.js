@@ -17,7 +17,7 @@ class Header extends React.Component {
         if (!this.props.blank) {
             if (!this.props.roomControls)
                 return (<div id="hd_opts" className="hstack space-around">
-                    <a className="hd_opt" href="/joinroom">Join room</a>
+                    <a className="hd_opt" href="/joinRoom">Join room</a>
                     <Link className="hd_opt" href="/account">Account</Link>
                 </div>)
             else
