@@ -71,6 +71,7 @@
   }
   .l-2x-txt {
     bottom: 8rem;
+    left: 4rem;
   }
   .m-2x {
     height: 6rem;
@@ -78,6 +79,7 @@
   }
   .m-2x-txt {
     bottom: 6rem;
+    left: 3rem;
   }
   .s-2x {
     height: 3.5rem;
@@ -85,6 +87,7 @@
   }
   .s-2x-txt {
     bottom: 3.5rem;
+    left: 1.5rem;
   }
 
   .l-1x {
@@ -117,6 +120,7 @@
   }
   .l-2x-txt {
     bottom: 7rem;
+    left: 3rem;
   }
   .m-2x {
     height: 5rem;
@@ -124,6 +128,7 @@
   }
   .m-2x-txt {
     bottom: 5rem;
+    left: 2rem;
   }
   .s-2x {
     height: 2.5rem;
@@ -131,5 +136,6 @@
   }
   .s-2x-txt {
     bottom: 2.5rem;
+    left: 1rem;
   }
 }

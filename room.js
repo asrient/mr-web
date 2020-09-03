@@ -4,6 +4,7 @@ import Header from "./header.js";
 import { TrackItem } from "./track.js";
 import { UserLink } from "./user.js";
 import { RoomArt } from "./roomArt.js";
+import ChatBar from "./chatBar.js";
 import { Link, Redirect } from "wouter";
 import css from "./room.css";
 import sharedCss from "./common.css";
@@ -251,11 +252,11 @@ class Room extends React.Component {
                 <Header roomControls />
                 <div id={css.main}>
                     <div id={css.p1}>
-                        <div style={{ padding: '1.2rem 2rem', maxWidth: '30rem' }} className='container ink-grey base-light size-s'>
-                            {this.txt()}
-                        </div>
                         <div className="center" style={{ minHeight: '23rem', maxWidth: '40rem', margin: '0px auto' }}>
                             {this.roomArt()}
+                        </div>
+                        <div style={{ padding: '1.2rem 2rem', maxWidth: '30rem' }} className='container ink-grey base-light size-s'>
+                            {this.txt()}
                         </div>
                     </div>
                     <div id={css.p2} className="container">
@@ -267,9 +268,11 @@ class Room extends React.Component {
                         </div>
                         <br />
                         <Queue />
+                        <br/>
+                        <br/>
                     </div>
-
                 </div>
+                <ChatBar/>
             </>)
     }
 }

@@ -26,6 +26,7 @@
 }
 #p1 {
   min-height: 25rem;
+  position: relative;
 }
 #player {
   position: sticky;
@@ -44,20 +45,20 @@
   grid-template-columns: auto 7rem;
   box-shadow: 0px 3px 6px 4px #00000063;
   overflow: hidden;
-  z-index: 10;
+  z-index: 2;
 }
-.playCircle{
-    height: 3.2rem;
-    width:3.2rem;
-    font-size: 1.1rem;
-    margin:0.5rem;
-    border:solid 2px rgb(189, 189, 189);
-    border-radius: 100%;
-    cursor: pointer;
-    -webkit-user-select: none;
-    z-index: 4;
+.playCircle {
+  height: 3.2rem;
+  width: 3.2rem;
+  font-size: 1.1rem;
+  margin: 0.5rem;
+  border: solid 2px rgb(189, 189, 189);
+  border-radius: 100%;
+  cursor: pointer;
+  -webkit-user-select: none;
+  z-index: 4;
 }
-.playCircle:hover{
-    background-color: rgba(207, 0, 0, 0.795);
-    border:none;
+.playCircle:hover {
+  background-color: rgba(207, 0, 0, 0.795);
+  border: none;
 }

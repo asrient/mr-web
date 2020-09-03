@@ -5,6 +5,7 @@ var toastCounter = 0;
 var messageCounter = 0;
 const TOAST_DURATION = 2500;
 const MESSAGE_DURATION = 6000;
+const TYPING_PERIOD = 2200;
 
 var MY_ID = null;
 const PLAYBACK_SUPPORT = Hls.isSupported() || iOSSafari
@@ -15,13 +16,17 @@ function time() {
     return new Date().getTime() / 1000
 }
 
+function timeMS() {
+    return new Date().getTime()
+}
+
 function reducers(state = 0, action) {
     switch (action.type) {
         case 'INIT': {
             if (window.initialState.is_loggedin) {
                 MY_ID = window.initialState.me.user_id
             }
-            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [] }
+            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [], typingUsers: [] }
             return st;
         }
         case 'UPDATE': {
@@ -102,6 +107,10 @@ class Live {
         switch (type) {
             case 'chat.text': {
                 state.message(data.date, user, data.text)
+                break;
+            }
+            case 'chat.typing': {
+                state.typing(data.date, data.user_id, data.isTyping)
                 break;
             }
             case 'update.members.connected': {
@@ -350,6 +359,35 @@ var state = {
             this.changeRoom(st.room)
         }
     },
+    popTyping(user_id) {
+        var st = store.getState();
+        if ((user_id in st.typingUsers) && (st.typingUsers[user_id] + TYPING_PERIOD <= timeMS())) {
+            delete st.typingUsers[user_id]
+            update(st)
+        }
+    },
+    typing(date, user_id, isTyping) {
+        var st = store.getState();
+        if (isTyping) {
+            st.typingUsers[user_id] = date
+            update(st)
+            window.setTimeout(() => {
+                this.popTyping(user_id)
+            }, TYPING_PERIOD + 900)
+        }
+        else {
+            if (user_id in st.typingUsers) {
+                delete st.typingUsers[user_id]
+                update(st)
+            }
+        }
+    },
+    setIsTyping(isTyping) {
+        var st = store.getState();
+        if (st.room) {
+            socket.send('chat.typing', { isTyping, date: timeMS() })
+        }
+    },
     getTopMessages(getUserIds = false) {
         var st = store.getState();
         var msgs = st.messages
@@ -383,7 +421,7 @@ var state = {
         var loc = window.location.pathname;
         if (loc != '/room') {
             this.toast(<div>
-                <div className="base-semibold" style={{fontSize:'0.95rem'}}>
+                <div className="base-semibold" style={{ fontSize: '0.95rem' }}>
                     {from.name}
                 </div>
                 <div>
@@ -566,6 +604,7 @@ var state = {
                     if (st.room != null) {
                         st.room = null;
                         st.messages = []
+                        st.typingUsers = []
                         update(st)
                         this.toast('You left the room')
                         this.syncPlayback()
@@ -584,6 +623,7 @@ var state = {
         room.tracks = null;
         st.room = room
         st.messages = []
+        st.typingUsers = []
         update(st)
         this.syncPlayback()
         this.updateRoomMembers()

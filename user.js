@@ -38,24 +38,37 @@ class UserCircle extends React.Component {
                     break;
                 }
             }
-            this.setState({ ...this.state, text: txt })
+            var isTyping = user_id in st.typingUsers;
+            this.setState({ ...this.state, text: txt, isTyping })
         }
     }
     componentWillUnmount() {
         this.unsub();
     }
     popup() {
-        if (!this.props.nopopup && this.state.text) {
-            var cls = css.popup
-            if (this.props.popupClass) {
-                cls += ' ' + this.props.popupClass
+        if (!this.props.nopopup) {
+            if (this.state.text) {
+                var cls = css.popup
+                if (this.props.popupClass) {
+                    cls += ' ' + this.props.popupClass
+                }
+                return (<div className={cls}>
+                    <div className={css.popupTxt}>
+                        {this.state.text}
+                    </div>
+                </div>)
             }
-            return (<div className={cls}>
-                <div className={css.popupTxt}>
-                    {this.state.text}
-                </div>
-
-            </div>)
+            else if (this.state.isTyping) {
+                var cls = css['typing-indicator']
+                if (this.props.popupClass) {
+                    cls += ' ' + this.props.popupClass
+                }
+                return (<div className={cls}>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>)
+            }
         }
     }
     onClick = () => {
@@ -81,6 +94,7 @@ class UserCircle extends React.Component {
         }
         return (<div key={this.props.user_id}
             style={styles}
+            onClick={this.onClick}
             className={cls}>
         </div>)
     }
