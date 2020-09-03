@@ -9,6 +9,10 @@ class Header extends React.Component {
     }
     componentDidMount() {
     }
+    getChatOpt(){
+        if(window.location.pathname=='/room')
+        return(<Link className="hd_opt" href="/room/chat">Chat</Link>)
+    }
     showOpts() {
         if (!this.props.blank) {
             if (!this.props.roomControls)
@@ -18,6 +22,7 @@ class Header extends React.Component {
                 </div>)
             else
                 return (<div id="hd_opts" className="hstack space-around">
+                    {this.getChatOpt()}
                     <Link className="hd_opt" href="/room/access">Access</Link>
                     <div className="hd_opt red_opt" onClick={() => { window.state.leaveRoom() }}>
                         &nbsp;LEAVE&nbsp;

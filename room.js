@@ -222,7 +222,7 @@ class Room extends React.Component {
                 txt = ['You are with '].concat(txt)
                 html=(<>
                 <div>{txt}</div>
-                <Link href='/room/chat' className={css.chatButton+' center'}>Chats &nbsp;
+                <Link href='/room/chat' className={css.chatButton+' center'}>Chat &nbsp;
                 <img src="/static/icons/expand.png" className="icon" style={{fontSize:'0.7rem'}} />
                 </Link>
                 </>)

@@ -83,13 +83,16 @@ class Chat extends React.Component {
         }
     }
     typingText() {
+        var st=window.state.getState()
         var txt=''
-        this.state.typing.forEach((user,ind)=>{
-            if(ind<3){
-                if(ind)
+        var count=0
+        this.state.typing.forEach((user)=>{
+            if(count<3&&user.user_id!=st.me.user_id){
+                if(count)
                txt+=', '+user.name 
                else
                txt=user.name
+               count++
             }
             
         })
