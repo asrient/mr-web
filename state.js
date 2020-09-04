@@ -56,10 +56,9 @@ class Live {
         this.socket = null;
         this.no_retries++;
         this.isConnected = false;
-        var hostUrl = window.location.hostname;
+        var hostUrl = window.location.host;
         var protocol = 'wss://'
-        if (hostUrl == 'localhost' || hostUrl.split('.')[0] == '192') {
-            hostUrl += ':8000'
+        if (hostUrl.split(':')[0] == 'localhost' || hostUrl.split('.')[0] == '192') {
             protocol = 'ws://'
         }
         this.socket = new WebSocket(protocol + hostUrl + '/live');
