@@ -145,8 +145,8 @@ class RoomAccess extends React.Component {
     codeExport = () => {
         const url = window.location.protocol + '//' + window.location.host + '/code/' + this.state.code
         const shareData = {
-            title: 'Music Room Party?',
-            text: "Lets have a party on Music Room! Room code: " + this.state.code + " See you there!",
+            title: 'Friendzone Party?',
+            text: "Lets have a party on Friendzone! Room code: " + this.state.code + " See you there!",
             url,
         }
         const clipText = url
