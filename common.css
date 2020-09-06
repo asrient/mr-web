@@ -19,6 +19,14 @@
 .redButt_s:hover{
     background-color: rgb(243, 0, 0);
 }
+.butt_active{
+    background-color: rgba(131, 0, 0, 0.288);
+    color:rgba(216, 0, 0, 0.911);
+    border:solid 2px rgba(185, 0, 0, 0.788);
+}
+.butt_active:hover{
+    background-color: rgba(131, 0, 0, 0.212);
+}
 .searchBar{
     padding: 0.6rem;
     padding-bottom: 1.2rem;

@@ -9,16 +9,12 @@ import { RoomArt } from "./roomArt.js";
 class RoomCard extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {}
+        this.state = { isMember: false }
     }
     componentDidMount() {
-
-    }
-    getCircle() {
-
-    }
-    gethero() {
-
+        var st = window.state.getState()
+        if (st.room && st.room.room_id == this.props.room_id)
+            this.setState({ ...this.state, isMember: true })
     }
     gettxt() {
         var members_count = this.props.members_count
@@ -53,16 +49,23 @@ class RoomCard extends React.Component {
         }
         return txt
     }
+    opt() {
+        if(this.state.isMember){
+            return(<Link href={'/room'} className={sharedCss.redButt_s+' '+ sharedCss.butt_active+ " center"}>Joined</Link>)
+        }
+        else
+        return(<Link href={'/roomPreview/' + this.props.room_id} className={sharedCss.redButt_s + " center"}>Join</Link>)
+    }
     render() {
-        var users=this.props.member_friends
+        var users = this.props.member_friends
 
         return (<div className={css.container}>
-            <div className={css.hero+' center'}>
-            <RoomArt users={users} size={1} />
+            <div className={css.hero + ' center'}>
+                <RoomArt users={users} size={1} />
             </div>
             <div className={css.txt + " ink-grey size-xs base-semilight"}>{this.gettxt()}</div>
             <div className="center">
-                <Link href={'/roomPreview/' + this.props.room_id} className={sharedCss.redButt_s + " center"}>Join</Link>
+                {this.opt()}
             </div>
         </div>)
     }
