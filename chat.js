@@ -24,9 +24,9 @@ class Chat extends React.Component {
     }
     componentDidMount() {
         this.parseState();
-        window.setTimeout(()=>{
-          window.scrollTo(0,document.body.scrollHeight);  
-        },300)
+        window.setTimeout(() => {
+            window.scrollTo(0, document.body.scrollHeight);
+        }, 300)
         this.unsub = window.state.subscribe(() => {
             this.parseState();
         })
@@ -54,25 +54,30 @@ class Chat extends React.Component {
     componentWillUnmount() {
         this.unsub();
     }
-    message(key, from, date, txt) {
-        return (<div key={key} className={css.chat}>
-            <div className={css.avatarBox}>
-                <UserCircle nopopup {...from} size='2.5rem' style={{ margin: '0px' }} />
-            </div>
-            <div className={css.text}>
-                <div className={css.chatTitle}>
-                    {from.name}
-                    <span className={css.chatTime}>{formatTime(new Date(date * 1000))}</span>
+    message(key, type = 'text', from, date, txt) {
+        if (type == 'text')
+            return (<div key={key} className={css.chat}>
+                <div className={css.avatarBox}>
+                    <UserCircle nopopup {...from} size='2.5rem' style={{ margin: '0px' }} />
                 </div>
-                <div>{txt}</div>
-            </div>
-        </div>)
+                <div className={css.text}>
+                    <div className={css.chatTitle}>
+                        {from.name}
+                        <span className={css.chatTime}>{formatTime(new Date(date * 1000))}</span>
+                    </div>
+                    <div>{txt}</div>
+                </div>
+            </div>)
+        else
+            return (<div key={key} className={'center ' + css.event}>
+                {txt}
+            </div>)
     }
     chats() {
         if (this.state.messages) {
             var list = []
             this.state.messages.forEach(chat => {
-                list.push(this.message(chat.key, chat.from, chat.date, chat.text))
+                list.push(this.message(chat.key, chat.type, chat.from, chat.date, chat.text))
             });
             return (<div className={'container ' + css.container}>
                 {this.typingText()}
@@ -86,22 +91,22 @@ class Chat extends React.Component {
         }
     }
     typingText() {
-        var st=window.state.getState()
-        var txt=''
-        var count=0
-        this.state.typing.forEach((user)=>{
-            if(count<3&&user.user_id!=st.me.user_id){
-                if(count)
-               txt+=', '+user.name 
-               else
-               txt=user.name
-               count++
+        var st = window.state.getState()
+        var txt = ''
+        var count = 0
+        this.state.typing.forEach((user) => {
+            if (count < 3 && user.user_id != st.me.user_id) {
+                if (count)
+                    txt += ', ' + user.name
+                else
+                    txt = user.name
+                count++
             }
-            
+
         })
-        if(txt.length){
-            txt+=' is typing..'
-            return(<div className={css.chatTyping}>{txt}</div>)
+        if (txt.length) {
+            txt += ' is typing..'
+            return (<div className={css.chatTyping}>{txt}</div>)
         }
     }
     render() {

@@ -22,40 +22,50 @@
   padding-top: 0px;
   padding-left: 0.6rem;
 }
-.chat{
-    cursor: default;
-    display: grid;
-    grid-template-columns: 4rem auto;
+.chat {
+  cursor: default;
+  display: grid;
+  grid-template-columns: 4rem auto;
   text-align: left;
   width: fit-content;
-    max-width: 23rem;
-    animation-name: pop;
+  max-width: 23rem;
+  animation-name: pop;
   animation-duration: 0.7s;
   position: relative;
-  margin:0.6rem 0.4rem;
+  margin: 0.6rem 0.4rem;
 }
-.avatarBox{
-    padding: 0.5rem;
-    padding-top: 0px;
-    display:flex;
-    justify-content: flex-start;
+.event {
+  padding: 0.4rem 1rem;
+  margin: 0.3rem auto;
+  max-width: 30rem;
+  color: rgb(128, 128, 128);
+  background-color: rgba(44, 44, 44, 0.28);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 200;
 }
-.chatTitle{
-    color: rgb(158, 0, 21);
+.avatarBox {
+  padding: 0.5rem;
+  padding-top: 0px;
+  display: flex;
+  justify-content: flex-start;
+}
+.chatTitle {
+  color: rgb(158, 0, 21);
   font-size: 0.93rem;
   font-weight: 500;
   padding-bottom: 0.4rem;
 }
-.chatTime{
-    font-size: 0.7rem;
-    padding-left: 0.5rem;
-    font-weight: 100;
-    color:rgb(148, 148, 148);
+.chatTime {
+  font-size: 0.7rem;
+  padding-left: 0.5rem;
+  font-weight: 100;
+  color: rgb(148, 148, 148);
 }
-.chatTyping{
-    font-size: 0.75rem;
-    padding: 0.8rem 1rem;
-    padding-bottom: 0px;
-    font-weight: 100;
-    color:rgb(148, 148, 148);
+.chatTyping {
+  font-size: 0.75rem;
+  padding: 0.8rem 1rem;
+  padding-bottom: 0px;
+  font-weight: 100;
+  color: rgb(148, 148, 148);
 }

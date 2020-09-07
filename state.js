@@ -32,7 +32,7 @@ function reducers(state = 0, action) {
             if (window.initialState.is_loggedin) {
                 MY_ID = window.initialState.me.user_id
             }
-            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [], typingUsers: [] }
+            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [], typingUsers: [], latestEvent:null }
             return st;
         }
         case 'UPDATE': {
@@ -91,13 +91,13 @@ class Live {
     }
     _onOpen = (event) => {
         console.log('connection LIVE!')
-        state.toast('Connected')
+        state.announceEvent('You are connected')
         this.no_retries = 0;
         this.isConnected = true;
     }
     _onClose = (event) => {
         console.warn('connection DOWN!')
-        state.toast('No connection')
+        state.announceEvent('Disconnected')
         this.isConnected = false;
         this.retry()
     }
@@ -111,7 +111,7 @@ class Live {
         var user = data.action_user
         switch (type) {
             case 'chat.text': {
-                state.message(data.date, user, data.text)
+                state.message('text', data.date, user, data.text)
                 break;
             }
             case 'chat.typing': {
@@ -120,26 +120,26 @@ class Live {
             }
             case 'update.members.connected': {
                 if (user.user_id != MY_ID)
-                    state.toast(user.name + ' connected', '/room/members')
+                    state.announceEvent(user.name + ' now connected')
                 break;
             }
             case 'update.members.disconnected': {
                 if (user.user_id != MY_ID)
-                    state.toast(user.name + ' disconnected', '/room/members')
+                    state.announceEvent(user.name + ' disconnected from chat')
                 break;
             }
             case 'update.members.add': {
                 if (user.user_id != MY_ID) {
                     state.addRoomMember(user, data.is_friend)
                     var txt = user.name + ' joined'
-                    state.toast(txt, '/room/members')
+                    state.announceEvent(txt)
                 }
                 break;
             }
             case 'update.members.remove': {
                 if (user.user_id != MY_ID) {
                     state.removeRoomMember(user)
-                    state.toast(user.name + ' left', '/room/members')
+                    state.announceEvent(user.name + ' left')
                 }
                 break;
             }
@@ -163,7 +163,7 @@ class Live {
                 if (user.user_id == MY_ID) {
                     name = 'You'
                 }
-                state.toast(name + ' paused the music', '/room')
+                state.announceEvent(name + ' paused the music')
                 break;
             }
             case 'update.playback.skipto': {
@@ -185,10 +185,10 @@ class Live {
                             txt = name + ' seeked the track'
                         }
                     }
-                    state.toast(txt, '/room')
+                    state.announceEvent(txt)
                 }
                 else {
-                    state.toast('Now playing ' + track.title, '/room')
+                    state.announceEvent('Now playing ' + track.title)
                 }
                 break;
             }
@@ -345,6 +345,7 @@ window.player.addEventListener('pause', (event) => {
 });
 
 const sampleMsg = {
+    type: 'text',
     date: time(),
     from: { user_id: 1, name: 'Sample User' },
     text: "Hello everyone!"
@@ -361,7 +362,6 @@ var state = {
         store.dispatch({ type: 'INIT' });
         var st = store.getState();
         if (st.room) {
-            console.log('in a room', st.room)
             this.changeRoom(st.room, false)
         }
         else {
@@ -421,27 +421,44 @@ var state = {
             socket.send('chat.text', { text, date: time() })
         }
     },
-    message(date, from, text) {
+    announceEvent(txt) {
+        var st = store.getState();
+        if(st.room)
+        this.message('event', time(), null, txt)
+        else
+        this.toast(text)
+    },
+    message(type, date, from, text = null) {
         var st = store.getState();
         var key = cache.messageCounter;//str
         cache.messageCounter++;
-        st.messages.push({ key, date, from, text })
-        cache['msg' + key] = JSON.stringify({ key, date, from, text })
-        update(st)
-        var loc = window.location.pathname;
-        if (loc != '/room' && loc != '/room/chat') {
-            this.toast(<div>
-                <div className="base-semibold" style={{ fontSize: '0.95rem' }}>
-                    {from.name}
-                </div>
-                <div>
-                    {text}
-                </div>
-            </div>, '/room/chat')
+        var msg = { key, type, date, from, text }
+        if (type == 'text') {
+            st.messages.push(msg)
+            var loc = window.location.pathname;
+            if (loc != '/room' && loc != '/room/chat') {
+                this.toast(<div>
+                    <div className="base-semibold" style={{ fontSize: '0.95rem' }}>
+                        {from.name}
+                    </div>
+                    <div>
+                        {text}
+                    </div>
+                </div>, '/room/chat')
+            }
+            window.setTimeout(() => {
+                this.popMessage(key)
+            }, MESSAGE_DURATION)
         }
-        window.setTimeout(() => {
-            this.popMessage(key)
-        }, MESSAGE_DURATION)
+        else {
+            st.latestEvent = msg
+            var loc = window.location.pathname;
+            if (loc != '/room/chat') {
+                this.toast(text, '/room')
+            }
+        }
+        cache['msg' + key] = JSON.stringify({ type, key, date, from, text })
+        update(st)
     },
     clearCacheMessages() {
         console.log('clearing cache messages..')
@@ -631,6 +648,7 @@ var state = {
                         st.room = null;
                         st.messages = []
                         st.typingUsers = []
+                        st.latestEvent = null
                         update(st)
                         this.clearCacheMessages()
                         this.toast('You left the room')
@@ -649,6 +667,7 @@ var state = {
         room.members = null;
         room.tracks = null;
         st.room = room
+        st.latestEvent = null
         st.messages = []
         st.typingUsers = []
         update(st)
