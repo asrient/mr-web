@@ -10,6 +10,12 @@ const TYPING_PERIOD = 2200;
 var MY_ID = null;
 const PLAYBACK_SUPPORT = Hls.isSupported() || iOSSafari
 
+const cache = window.localStorage;
+
+if (!cache.messageCounter) {
+    cache.messageCounter = 0
+}
+
 var isFirstPlay = true;
 
 function time() {
@@ -58,7 +64,7 @@ class Live {
         this.isConnected = false;
         var hostUrl = window.location.host;
         var protocol = 'wss://'
-        if (window.location.protocol=='http:') {
+        if (window.location.protocol == 'http:') {
             protocol = 'ws://'
         }
         this.socket = new WebSocket(protocol + hostUrl + '/live');
@@ -355,7 +361,11 @@ var state = {
         store.dispatch({ type: 'INIT' });
         var st = store.getState();
         if (st.room) {
-            this.changeRoom(st.room)
+            console.log('in a room', st.room)
+            this.changeRoom(st.room, false)
+        }
+        else {
+            this.clearCacheMessages()
         }
     },
     popTyping(user_id) {
@@ -413,12 +423,13 @@ var state = {
     },
     message(date, from, text) {
         var st = store.getState();
-        var key = messageCounter;
-        messageCounter++;
+        var key = cache.messageCounter;//str
+        cache.messageCounter++;
         st.messages.push({ key, date, from, text })
+        cache['msg' + key] = JSON.stringify({ key, date, from, text })
         update(st)
         var loc = window.location.pathname;
-        if (loc != '/room'&&loc != '/room/chat') {
+        if (loc != '/room' && loc != '/room/chat') {
             this.toast(<div>
                 <div className="base-semibold" style={{ fontSize: '0.95rem' }}>
                     {from.name}
@@ -426,11 +437,27 @@ var state = {
                 <div>
                     {text}
                 </div>
-            </div>,'/room/chat')
+            </div>, '/room/chat')
         }
         window.setTimeout(() => {
             this.popMessage(key)
         }, MESSAGE_DURATION)
+    },
+    clearCacheMessages() {
+        console.log('clearing cache messages..')
+        for (var i = 0; i < cache.messageCounter; i++) {
+            cache.removeItem('msg' + i)
+        }
+        cache.messageCounter = 0
+    },
+    getCacheMessages() {
+        var list = []
+        for (var i = 0; i < cache.messageCounter; i++) {
+            if (cache['msg' + i]) {
+                list.push(JSON.parse(cache['msg' + i]))
+            }
+        }
+        return list;
     },
     popMessage(key) {
         var st = store.getState();
@@ -605,6 +632,7 @@ var state = {
                         st.messages = []
                         st.typingUsers = []
                         update(st)
+                        this.clearCacheMessages()
                         this.toast('You left the room')
                         this.syncPlayback()
                     }
@@ -616,7 +644,7 @@ var state = {
             })
         }
     },
-    changeRoom: function (room) {
+    changeRoom: function (room, clearCacheMsgs = true) {
         var st = store.getState();
         room.members = null;
         room.tracks = null;
@@ -624,6 +652,9 @@ var state = {
         st.messages = []
         st.typingUsers = []
         update(st)
+        if (clearCacheMsgs) {
+            this.clearCacheMessages()
+        }
         this.syncPlayback()
         this.updateRoomMembers()
         this.updateRoomTracks()

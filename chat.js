@@ -24,6 +24,9 @@ class Chat extends React.Component {
     }
     componentDidMount() {
         this.parseState();
+        window.setTimeout(()=>{
+          window.scrollTo(0,document.body.scrollHeight);  
+        },300)
         this.unsub = window.state.subscribe(() => {
             this.parseState();
         })
@@ -41,7 +44,7 @@ class Chat extends React.Component {
                     }
                 });
             }
-            var msgs = [...st.messages]
+            var msgs = window.state.getCacheMessages()
             msgs.reverse()
             this.setState({ ...this.state, messages: msgs, typing })
         }
