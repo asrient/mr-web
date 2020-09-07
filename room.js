@@ -9,6 +9,10 @@ import { Link, Redirect } from "wouter";
 import css from "./room.css";
 import sharedCss from "./common.css";
 
+function time() {
+    return new Date().getTime() / 1000
+}
+
 class Queue extends React.Component {
     constructor(props) {
         super(props);
@@ -91,6 +95,58 @@ class Queue extends React.Component {
                 </div>
                 <br />
             </div>)
+    }
+}
+
+class ProgressBar extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { isPaused: true, durationCompleted: 0, duration: 100 }
+        this.timerID = null
+    }
+    componentDidMount() {
+        this.parseState();
+        this.unsub = window.state.subscribe(() => {
+            this.parseState();
+        })
+    }
+    parseState() {
+        var st = window.state.getState();
+        if (st.room) {
+            var isPaused = st.room.is_paused;
+            var duration = st.room.current_roomtrack.duration
+            if (!isPaused)
+                var durationCompleted = duration - st.room.duration_to_complete + (time() - (new Date(st.room.play_start_time).getTime() / 1000))
+            else
+                var durationCompleted = duration - st.room.duration_to_complete
+            this.setState({ ...this.state, isPaused, durationCompleted, duration })
+            if (isPaused && this.timerID) {
+                window.clearInterval(this.timerID);
+                this.timerID = null
+            }
+            if (!isPaused && !this.timerID) {
+                this.timerID = window.setInterval(this.progressTimer, 1000);
+            }
+        }
+    }
+    componentWillUnmount() {
+        this.unsub();
+        if (this.timerID)
+            window.clearInterval(this.timerID);
+        this.timerID = null
+    }
+    progressTimer = () => {
+        if (!this.state.isPaused) {
+            var durationCompleted = this.state.durationCompleted + 1
+            this.setState({ ...this.state, durationCompleted })
+        }
+    }
+    render() {
+        var progress = (this.state.durationCompleted / this.state.duration) * 100
+        var fillStyle = { width: progress + '%' }
+        return (<div id={css.pBar}>
+            <div id={css.pbar_fill} style={fillStyle} ></div>
+        </div>)
     }
 }
 
@@ -191,7 +247,7 @@ class Room extends React.Component {
                 }
             })
             var txt = []
-            var html=null
+            var html = null
             var othersCount = members_count - member_friends.length
             if (othersCount > 0) {
                 //removing urself from the count
@@ -220,11 +276,11 @@ class Room extends React.Component {
             }
             if (txt.length) {
                 txt = ['You are with '].concat(txt)
-                html=(<>
-                <div>{txt}</div>
-                <Link href='/room/chat' className={css.chatButton+' center'}>Chat &nbsp;
-                <img src="/static/icons/expand.png" className="icon" style={{fontSize:'0.7rem'}} />
-                </Link>
+                html = (<>
+                    <div>{txt}</div>
+                    <Link href='/room/chat' className={css.chatButton + ' center'}>Chat &nbsp;
+                <img src="/static/icons/expand.png" className="icon" style={{ fontSize: '0.7rem' }} />
+                    </Link>
                 </>)
             }
             else {
@@ -259,7 +315,7 @@ class Room extends React.Component {
                 <Header roomControls />
                 <div id={css.main}>
                     <div id={css.p1}>
-                        <div className="center" style={{ height: '23rem', maxWidth: '40rem',overflow:'hidden', margin: '0px auto' }}>
+                        <div className="center" style={{ height: '23rem', maxWidth: '40rem', overflow: 'hidden', margin: '0px auto' }}>
                             {this.roomArt()}
                         </div>
                         <div style={{ padding: '1.2rem 2rem', maxWidth: '30rem' }} className='container ink-grey base-light size-s'>
@@ -267,19 +323,24 @@ class Room extends React.Component {
                         </div>
                     </div>
                     <div id={css.p2} className="container">
-                        <div id={css.player}>
-                            {this.player()}
-                            <div className="center">
-                                {this.playButton()}
+                        <div id={css.playerBox}>
+                            <div id={css.player}>
+                                {this.player()}
+                                <div className="center">
+                                    {this.playButton()}
+                                </div>
+                            </div>
+                            <div>
+                                <ProgressBar />
                             </div>
                         </div>
                         <br />
                         <Queue />
-                        <br/>
-                        <br/>
+                        <br />
+                        <br />
                     </div>
                 </div>
-                <ChatBar/>
+                <ChatBar />
             </>)
     }
 }
