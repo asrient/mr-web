@@ -32,7 +32,7 @@ function reducers(state = 0, action) {
             if (window.initialState.is_loggedin) {
                 MY_ID = window.initialState.me.user_id
             }
-            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [], typingUsers: [], latestEvent:null }
+            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [], typingUsers: [], latestEvent: null }
             return st;
         }
         case 'UPDATE': {
@@ -54,153 +54,139 @@ class Live {
     constructor() {
         this.socket = null;
         this.isConnected = false;
-        this.no_retries = 0;
-        this.MAX_RETRIES = 5;
         this.connect()
     }
     connect = () => {
         this.socket = null;
-        this.no_retries++;
         this.isConnected = false;
         var hostUrl = window.location.host;
-        var protocol = 'wss://'
+        var protocol = 'https://'
         if (window.location.protocol == 'http:') {
-            protocol = 'ws://'
+            protocol = 'http://'
         }
-        this.socket = new WebSocket(protocol + hostUrl + '/live');
-        this.socket.onopen = this._onOpen;
-        this.socket.onclose = this._onClose;
-        this.socket.onerror = this._onError;
-        this.socket.onmessage = this._onMessage;
-    }
-    retry = () => {
-        if (!this.isConnected) {
-            this.socket = null;
-            if (this.no_retries < this.MAX_RETRIES) {
-                this.no_retries++;
-                var timeout = 3000 * (this.no_retries + 1);
-                window.setTimeout(this.connect, timeout);
+        if (location.hostname == 'localhost') {
+            hostUrl = 'localhost:3000'
+        }
+        else {
+            hostUrl = 'live.' + hostUrl
+        }
+        this.socket = new io(hostUrl, { path: '/updates' });
+        this.socket.on('connect', this._onOpen);
+        this.socket.on('reconnect', this._onOpen);
+        this.socket.on('disconnect', this._onClose);
+        this.socket.on('connect_error', this._onError);
+        this.socket.on('chat.text', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            var _user = state.getUser(data.user_id)
+            if (_user)
+                state.message('text', data.date, _user, data.text)
+        });
+        this.socket.on('chat.typing', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            state.typing(data.date, data.user_id, data.isTyping)
+        });
+        this.socket.on('update.members.connected', (msg) => {
+            var data = JSON.parse(msg);
+            var user = state.getUser(data.user_id)
+            if (user && (user.user_id != MY_ID))
+                state.announceEvent(user.name + ' now connected')
+        });
+        this.socket.on('update.members.disconnected', (msg) => {
+            var data = JSON.parse(msg);
+            var user = state.getUser(data.user_id)
+            if (user && (user.user_id != MY_ID))
+                state.announceEvent(user.name + ' disconnected from chat')
+        });
+        this.socket.on('update.members.add', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            if (user.user_id != MY_ID) {
+                state.addRoomMember(user)
+                var txt = user.name + ' joined'
+                state.announceEvent(txt)
+            }
+        });
+        this.socket.on('update.members.remove', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            if (user.user_id != MY_ID) {
+                state.removeRoomMember(user)
+                state.announceEvent(user.name + ' left')
+            }
+        });
+        this.socket.on('update.tracks.add', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            state.addRoomtrack(data.roomtrack)
+            if (user.user_id != MY_ID) {
+                state.toast(user.name + ' added ' + data.roomtrack.title, '/room')
+            }
+        });
+        this.socket.on('update.tracks.remove', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            state.removeRoomtrack(data.roomtrack)
+            if (user.user_id != MY_ID) {
+                state.toast(user.name + ' removed ' + data.roomtrack.title, '/room')
+            }
+        });
+        this.socket.on('update.playback.pause', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            state.updatePlayback(data.room)
+            var name = user.name
+            if (user.user_id == MY_ID) {
+                name = 'You'
+            }
+            state.announceEvent(name + ' paused the music')
+        });
+        this.socket.on('update.playback.skipto', (msg) => {
+            var data = JSON.parse(msg);
+            var user = data.action_user
+            var oldTrack = state.getState().room.current_roomtrack
+            var wasPaused = state.getState().room.is_paused
+            state.updatePlayback(data.room)
+            var track = data.room.current_roomtrack
+            if (user) {
+                var name = user.name
+                if (user.user_id == MY_ID) {
+                    name = 'You'
+                }
+                var txt = name + ' changed the track to ' + track.title
+                if (oldTrack.roomtrack_id == track.roomtrack_id) {
+                    if (wasPaused && !data.room.is_paused) {
+                        txt = name + ' resumed music'
+                    }
+                    else {
+                        txt = name + ' seeked the track'
+                    }
+                }
+                state.announceEvent(txt)
             }
             else {
-                console.warn('MAX Retries reached, No connection!');
-                this.no_retries = 0;
-                state.toast('No internet')
-                window.setTimeout(this.retry, 7 * 60 * 1000); //7 mins
+                state.announceEvent('Now playing ' + track.title)
             }
-        }
+        });
     }
     _onOpen = (event) => {
         console.log('connection LIVE!')
         state.announceEvent('You are connected')
-        this.no_retries = 0;
         this.isConnected = true;
     }
     _onClose = (event) => {
         console.warn('connection DOWN!')
         state.announceEvent('Disconnected')
         this.isConnected = false;
-        this.retry()
     }
     _onError = (event) => {
         console.error('connection error!', event)
         state.toast('Connection error')
     }
-    _onMessage = (event) => {
-        var data = JSON.parse(event.data);
-        var type = data.type;
-        var user = data.action_user
-        switch (type) {
-            case 'chat.text': {
-                state.message('text', data.date, user, data.text)
-                break;
-            }
-            case 'chat.typing': {
-                state.typing(data.date, data.user_id, data.isTyping)
-                break;
-            }
-            case 'update.members.connected': {
-                if (user.user_id != MY_ID)
-                    state.announceEvent(user.name + ' now connected')
-                break;
-            }
-            case 'update.members.disconnected': {
-                if (user.user_id != MY_ID)
-                    state.announceEvent(user.name + ' disconnected from chat')
-                break;
-            }
-            case 'update.members.add': {
-                if (user.user_id != MY_ID) {
-                    state.addRoomMember(user, data.is_friend)
-                    var txt = user.name + ' joined'
-                    state.announceEvent(txt)
-                }
-                break;
-            }
-            case 'update.members.remove': {
-                if (user.user_id != MY_ID) {
-                    state.removeRoomMember(user)
-                    state.announceEvent(user.name + ' left')
-                }
-                break;
-            }
-            case 'update.tracks.add': {
-                state.addRoomtrack(data.roomtrack)
-                if (user.user_id != MY_ID) {
-                    state.toast(user.name + ' added ' + data.roomtrack.title, '/room')
-                }
-                break;
-            }
-            case 'update.tracks.remove': {
-                state.removeRoomtrack(data.roomtrack)
-                if (user.user_id != MY_ID) {
-                    state.toast(user.name + ' removed ' + data.roomtrack.title, '/room')
-                }
-                break;
-            }
-            case 'update.playback.pause': {
-                state.updatePlayback(data.room)
-                var name = user.name
-                if (user.user_id == MY_ID) {
-                    name = 'You'
-                }
-                state.announceEvent(name + ' paused the music')
-                break;
-            }
-            case 'update.playback.skipto': {
-                var oldTrack = state.getState().room.current_roomtrack
-                var wasPaused = state.getState().room.is_paused
-                state.updatePlayback(data.room)
-                var track = data.room.current_roomtrack
-                if (user) {
-                    var name = user.name
-                    if (user.user_id == MY_ID) {
-                        name = 'You'
-                    }
-                    var txt = name + ' changed the track to ' + track.title
-                    if (oldTrack.roomtrack_id == track.roomtrack_id) {
-                        if (wasPaused && !data.room.is_paused) {
-                            txt = name + ' resumed music'
-                        }
-                        else {
-                            txt = name + ' seeked the track'
-                        }
-                    }
-                    state.announceEvent(txt)
-                }
-                else {
-                    state.announceEvent('Now playing ' + track.title)
-                }
-                break;
-            }
-            default: {
-                console.debug('unknown live msg', data);
-            }
-        }
-    }
     send = (type, data) => {
-        var body = JSON.stringify({ ...data, type })
         if (this.socket && this.isConnected) {
-            this.socket.send(body);
+            this.socket.emit(type, JSON.stringify(data));
         }
         else {
             console.warn('Cant send msg, connection down', type, data);
@@ -368,6 +354,25 @@ var state = {
             this.clearCacheMessages()
         }
     },
+    getUser(user_id) {
+        var st = store.getState();
+        if (st.room && st.room.members) {
+            var friends = st.room.members.friends
+            var others = st.room.members.others
+            var user = friends.find((friend) => { return friend.user_id == user_id })
+            if (!user) {
+                user = others.find((other) => { return other.user_id == user_id })
+            }
+            if (!user) {
+                return null
+            }
+            else
+                return user
+        }
+        else {
+            return null
+        }
+    },
     popTyping(user_id) {
         var st = store.getState();
         if ((user_id in st.typingUsers) && (st.typingUsers[user_id] + TYPING_PERIOD <= timeMS())) {
@@ -423,10 +428,10 @@ var state = {
     },
     announceEvent(txt) {
         var st = store.getState();
-        if(st.room)
-        this.message('event', time(), null, txt)
+        if (st.room)
+            this.message('event', time(), null, txt)
         else
-        this.toast(text)
+            this.toast(text)
     },
     message(type, date, from, text = null) {
         var st = store.getState();
@@ -565,21 +570,26 @@ var state = {
             }
         }
     },
-    addRoomMember: function (user, isFriend) {
-        var st = store.getState();
-        var grp = 'others'
-        if (isFriend) {
-            grp = 'friends'
-        }
-        if (st.room.members) {
-            var alreadyThere = st.room.members[grp].find((member) => { return member.user_id == user.user_id })
-            if (!alreadyThere) {
-                st.room.members[grp].push(user)
-                st.room.members_count++;
-                console.log(user, 'joined', grp, st.room.members)
-                update(st)
+    addRoomMember: function (user) {
+        api.post('friends/status', { user_id: user.user_id }, (status, data) => {
+            var st = store.getState();
+            var grp = 'others'
+            if (status == 200 && data.friendship_status == 3) {
+                grp = 'friends'
             }
-        }
+            if (status != 200) {
+                console.error("err in getting friendship status", status, data)
+            }
+            if (st.room.members) {
+                var alreadyThere = st.room.members[grp].find((member) => { return member.user_id == user.user_id })
+                if (!alreadyThere) {
+                    st.room.members[grp].push(user)
+                    st.room.members_count++;
+                    console.log(user, 'joined', grp, st.room.members)
+                    update(st)
+                }
+            }
+        })
     },
     removeRoomMember: function (user) {
         var look = (grp) => {
@@ -719,7 +729,14 @@ var state = {
         var st = store.getState();
         if (st.room) {
             if (st.room.is_paused) {
-                socket.send('set.playback.play')
+                api.get('room/play', null, (status, data) => {
+                    if (status == 201) {
+                        //
+                    }
+                    else {
+                        this.toast('Falied to play', '/room')
+                    }
+                })
             }
         }
     },
@@ -727,14 +744,29 @@ var state = {
         var st = store.getState();
         if (st.room) {
             if (!st.room.is_paused) {
-                socket.send('set.playback.pause')
+                api.get('room/pause', null, (status, data) => {
+                    if (status == 201) {
+                        //
+                    }
+                    else {
+                        this.toast('Falied to pause', '/room')
+                    }
+                })
             }
         }
     },
     skipTo(roomtrackId, duration = null) {
         var st = store.getState();
         if (st.room) {
-            socket.send('set.playback.skipto', { roomtrack_id: roomtrackId, duration })
+            var data = { roomtrack_id: roomtrackId, duration }
+            api.post('room/skipto', data, (status, res) => {
+                if (status == 201) {
+                    //
+                }
+                else {
+                    this.toast('Falied to skip', '/room')
+                }
+            })
         }
     }
 }
