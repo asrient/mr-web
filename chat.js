@@ -20,7 +20,7 @@ function formatTime(date) {
 class Chat extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { messages: null, typing: [], exit: false }
+        this.state = { messages: null, typing: [], exit: false, isConnected: false, chatSyncing: false }
     }
     componentDidMount() {
         this.parseState();
@@ -45,8 +45,11 @@ class Chat extends React.Component {
                 });
             }
             var msgs = window.state.getCacheMessages()
-            msgs.reverse()
-            this.setState({ ...this.state, messages: msgs, typing })
+            //in reverse order
+            msgs.sort((m1, m2) => {
+                return m2.date - m1.date
+            })
+            this.setState({ ...this.state, messages: msgs, typing, isConnected: st.isConnected, chatSyncing: !st.isChatUpdated })
         }
         else
             this.setState({ ...this.state, exit: true })
@@ -63,7 +66,7 @@ class Chat extends React.Component {
                 <div className={css.text}>
                     <div className={css.chatTitle}>
                         {from.name}
-                        <span className={css.chatTime}>{formatTime(new Date(date * 1000))}</span>
+                        <span className={css.chatTime}>{formatTime(new Date(date))}</span>
                     </div>
                     <div>{txt}</div>
                 </div>
@@ -109,12 +112,23 @@ class Chat extends React.Component {
             return (<div className={css.chatTyping}>{txt}</div>)
         }
     }
+    getToast() {
+        if (!this.state.isConnected)
+            return (<div id={css.toastContainer} className="center">
+                <div id={css.toast} className="center">Disconnected</div>
+            </div>)
+        else if (this.state.chatSyncing)
+            return (<div id={css.toastContainer} className="center">
+                <div id={css.toast} className="center">Syncing..</div>
+            </div>)
+    }
     render() {
         if (this.state.exit)
             return (<Redirect to='/rooms' />)
         else
             return (<>
                 <Header roomControls />
+                {this.getToast()}
                 {this.chats()}
                 <ChatBar scrollBottom />
             </>)

@@ -18,6 +18,24 @@ if (!cache.messageCounter) {
 
 var isFirstPlay = true;
 
+const LIVE_BASE_URL = (function () {
+    var hostUrl = window.location.host;
+    var protocol = 'https://'
+    if (window.location.protocol == 'http:') {
+        protocol = 'http://'
+    }
+    if (location.hostname == 'localhost') {
+        hostUrl = 'localhost:3000'
+    }
+    else {
+        hostUrl = 'live.' + hostUrl
+    }
+    return protocol + hostUrl;
+})();
+
+
+var liveApi = new window.Api(LIVE_BASE_URL + '/')
+
 function time() {
     return new Date().getTime() / 1000
 }
@@ -32,7 +50,17 @@ function reducers(state = 0, action) {
             if (window.initialState.is_loggedin) {
                 MY_ID = window.initialState.me.user_id
             }
-            var st = { ...window.initialState, toasts: [], showAutoplayBanner: false, messages: [], typingUsers: [], latestEvent: null }
+            var st = {
+                ...window.initialState,
+                toasts: [],
+                showAutoplayBanner: false,
+                messages: [],
+                typingUsers: [],
+                latestEvent: null,
+                isConnected: false,
+                lastConnectedOn: null,
+                isChatUpdated: false
+            }
             return st;
         }
         case 'UPDATE': {
@@ -174,11 +202,20 @@ class Live {
         console.log('connection LIVE!')
         state.announceEvent('You are connected')
         this.isConnected = true;
+        var st = window.state.getState()
+        st.isConnected = true;
+        st.isChatUpdated = false;
+        update(st);
+        state.syncChats()
     }
     _onClose = (event) => {
         console.warn('connection DOWN!')
         state.announceEvent('Disconnected')
         this.isConnected = false;
+        var st = window.state.getState()
+        st.isConnected = false;
+        st.lastConnectedOn = timeMS();
+        update(st);
     }
     _onError = (event) => {
         console.error('connection error!', event)
@@ -354,6 +391,37 @@ var state = {
             this.clearCacheMessages()
         }
     },
+    syncChats() {
+        var st = store.getState();
+        var currTime = timeMS();
+        if (st.isConnected && currTime - st.lastConnectedOn > 1500) {
+            var startTime=st.lastConnectedOn||0
+            console.log("syncing chats..",startTime);
+            liveApi.get('chats', { startTime }, (status, data) => {
+                if (status == 200) {
+                    data.chats.forEach(chat => {
+                        var _user = state.getUser(chat.user_id)
+                        if (_user) {
+                            var key = cache.messageCounter;//str
+                            cache.messageCounter++;
+                            var msg = { key, type: 'text', date: chat.date, from: _user, text: chat.text }
+                            cache['msg' + key] = JSON.stringify(msg)
+                        }
+                    });
+                }
+                else{
+                    console.error('could not get chats',status,data)
+                }
+                var st = store.getState();
+                st.isChatUpdated = true;
+                update(st);
+            })
+        }
+        else {
+            st.isChatUpdated = true;
+            update(st)
+        }
+    },
     getUser(user_id) {
         var st = store.getState();
         if (st.room && st.room.members) {
@@ -423,13 +491,13 @@ var state = {
     sendMessage(text) {
         var st = store.getState();
         if (st.room) {
-            socket.send('chat.text', { text, date: time() })
+            socket.send('chat.text', { text, date: timeMS() })
         }
     },
     announceEvent(txt) {
         var st = store.getState();
         if (st.room)
-            this.message('event', time(), null, txt)
+            this.message('event', timeMS(), null, txt)
         else
             this.toast(text)
     },
