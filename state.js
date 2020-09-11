@@ -58,7 +58,7 @@ function reducers(state = 0, action) {
                 typingUsers: [],
                 latestEvent: null,
                 isConnected: false,
-                lastConnectedOn: null,
+                lastConnectedOn: cache.lastConnectedOn,
                 isChatUpdated: false
             }
             return st;
@@ -74,6 +74,7 @@ function reducers(state = 0, action) {
 let store = createStore(reducers);
 
 function update(st) {
+    cache.lastConnectedOn = st.lastConnectedOn
     store.dispatch({ type: 'UPDATE', state: st });
 }
 
@@ -395,8 +396,8 @@ var state = {
         var st = store.getState();
         var currTime = timeMS();
         if (st.isConnected && currTime - st.lastConnectedOn > 1500) {
-            var startTime=st.lastConnectedOn||0
-            console.log("syncing chats..",startTime);
+            var startTime = st.lastConnectedOn || 0
+            console.log("syncing chats..", startTime);
             liveApi.get('chats', { startTime }, (status, data) => {
                 if (status == 200) {
                     data.chats.forEach(chat => {
@@ -409,11 +410,13 @@ var state = {
                         }
                     });
                 }
-                else{
-                    console.error('could not get chats',status,data)
+                else {
+                    console.error('could not get chats', status, data)
                 }
                 var st = store.getState();
                 st.isChatUpdated = true;
+                if (st.isConnected)
+                    st.lastConnectedOn = timeMS()
                 update(st);
             })
         }
@@ -503,6 +506,7 @@ var state = {
     },
     message(type, date, from, text = null) {
         var st = store.getState();
+        st.lastConnectedOn = timeMS();
         var key = cache.messageCounter;//str
         cache.messageCounter++;
         var msg = { key, type, date, from, text }
@@ -539,6 +543,14 @@ var state = {
             cache.removeItem('msg' + i)
         }
         cache.messageCounter = 0
+    },
+    resetCacheMessages() {
+        this.clearCacheMessages();
+        var st = store.getState();
+        st.isChatUpdated = true;
+        st.lastConnectedOn = 0;
+        update(st)
+        this.syncChats();
     },
     getCacheMessages() {
         var list = []

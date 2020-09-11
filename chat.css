@@ -69,19 +69,47 @@
   font-weight: 100;
   color: rgb(148, 148, 148);
 }
-#toastContainer{
-position: fixed;
-z-index: 3;
-top:4rem;
-left: 0px;
-width: 100%;
-padding: 1rem;
+.toastContainer {
+  position: fixed;
+  z-index: 3;
+  top: 4rem;
+  left: 0px;
+  width: 100%;
+  padding: 1rem;
 }
-#toast{
-font-size: 0.9rem;
-color:rgb(245, 245, 245);
-font-weight: 500;
-padding: 0.4rem 1rem;
-background-color: rgb(74, 74, 74);
-border-radius: 1rem;
+.toast {
+  font-size: 0.9rem;
+  color: rgb(245, 245, 245);
+  font-weight: 500;
+  padding: 0.4rem 1rem;
+  background-color: rgb(74, 74, 74);
+  border-radius: 1rem;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#refButt {
+  position: fixed;
+  right: 2rem;
+  top: 6rem;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  font-weight: 200;
+  background-color: rgba(105, 105, 105, 0.295);
+  background-image: url('/static/icons/refresh.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1rem;
+  border-radius: 100%;
+  padding: 0.4rem;
+  height: 2.1rem;
+  width: 2.1rem;
+}
+#refButt:hover {
+  background-color: rgba(138, 138, 138, 0.712);
+}
+@media(max-width:800px){
+  #refButt {
+    right: 1rem;
+  }
 }

@@ -114,13 +114,16 @@ class Chat extends React.Component {
     }
     getToast() {
         if (!this.state.isConnected)
-            return (<div id={css.toastContainer} className="center">
-                <div id={css.toast} className="center">Disconnected</div>
+            return (<div className={"center "+css.toastContainer}>
+                <div className={"center "+css.toast}>Disconnected</div>
             </div>)
         else if (this.state.chatSyncing)
-            return (<div id={css.toastContainer} className="center">
-                <div id={css.toast} className="center">Syncing..</div>
+            return (<div className={"center "+css.toastContainer}>
+                <div className={"center "+css.toast}>Syncing..</div>
             </div>)
+        else return(<div id={css.refButt} className={"center "+css.toast} onClick={()=>{
+            window.state.resetCacheMessages()
+        }}></div>)
     }
     render() {
         if (this.state.exit)
