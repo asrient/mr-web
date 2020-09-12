@@ -6,6 +6,7 @@ var messageCounter = 0;
 const TOAST_DURATION = 3000;
 const MESSAGE_DURATION = 30000;
 const TYPING_PERIOD = 2200;
+const PING_INTERVAL = 35 * 1000;
 
 var MY_ID = null;
 const PLAYBACK_SUPPORT = Hls.isSupported() || iOSSafari
@@ -391,6 +392,16 @@ var state = {
         else {
             this.clearCacheMessages()
         }
+        if (st.me) {
+            window.setInterval(state.ping, PING_INTERVAL)
+        }
+    },
+    ping() {
+        api.get('ping', null, (status, data) => {
+            if (status != 201) {
+                console.error("Failed to ping", status, data);
+            }
+        })
     },
     syncChats() {
         var st = store.getState();
