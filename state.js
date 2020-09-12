@@ -513,7 +513,7 @@ var state = {
         if (st.room)
             this.message('event', timeMS(), null, txt)
         else
-            this.toast(text)
+            this.toast(txt)
     },
     message(type, date, from, text = null) {
         var st = store.getState();
