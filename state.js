@@ -3,7 +3,7 @@ import React, { Component } from "react";
 
 var toastCounter = 0;
 var messageCounter = 0;
-const TOAST_DURATION = 2500;
+const TOAST_DURATION = 3000;
 const MESSAGE_DURATION = 30000;
 const TYPING_PERIOD = 2200;
 

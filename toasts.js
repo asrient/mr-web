@@ -26,13 +26,13 @@ class Toasts extends React.Component {
         var content=()=>{
             if(link){
                 return(<Link href={link} className={css.content+' '+css.link}>
-                    <div className={css.mr_title}>🎵 MUSIC ROOM</div>
+                    <div className={css.mr_title}>🎵 FRIENDZONE</div>
                 <div>{html}</div>
                 </Link>)
             }
             else{
                 return(<div className={css.content}>
-                    <div className={css.mr_title}>🎵 MUSIC ROOM</div>
+                    <div className={css.mr_title}>🎵 FRIENDZONE</div>
                     <div>{html}</div>
                     </div>)
             }
