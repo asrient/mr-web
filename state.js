@@ -405,35 +405,37 @@ var state = {
     },
     syncChats() {
         var st = store.getState();
-        var currTime = timeMS();
-        if (st.isConnected && currTime - st.lastConnectedOn > 1500) {
-            var startTime = st.lastConnectedOn || 0
-            console.log("syncing chats..", startTime);
-            liveApi.get('chats', { startTime }, (status, data) => {
-                if (status == 200) {
-                    data.chats.forEach(chat => {
-                        var _user = state.getUser(chat.user_id)
-                        if (_user) {
-                            var key = cache.messageCounter;//str
-                            cache.messageCounter++;
-                            var msg = { key, type: 'text', date: chat.date, from: _user, text: chat.text }
-                            cache['msg' + key] = JSON.stringify(msg)
-                        }
-                    });
-                }
-                else {
-                    console.error('could not get chats', status, data)
-                }
-                var st = store.getState();
+        if (st.room) {
+            var currTime = timeMS();
+            if (st.isConnected && currTime - st.lastConnectedOn > 1500) {
+                var startTime = st.lastConnectedOn || 0
+                console.log("syncing chats..", startTime);
+                liveApi.get('chats', { startTime }, (status, data) => {
+                    if (status == 200) {
+                        data.chats.forEach(chat => {
+                            var _user = state.getUser(chat.user_id)
+                            if (_user) {
+                                var key = cache.messageCounter;//str
+                                cache.messageCounter++;
+                                var msg = { key, type: 'text', date: chat.date, from: _user, text: chat.text }
+                                cache['msg' + key] = JSON.stringify(msg)
+                            }
+                        });
+                    }
+                    else {
+                        console.error('could not get chats', status, data)
+                    }
+                    var st = store.getState();
+                    st.isChatUpdated = true;
+                    if (st.isConnected)
+                        st.lastConnectedOn = timeMS()
+                    update(st);
+                })
+            }
+            else {
                 st.isChatUpdated = true;
-                if (st.isConnected)
-                    st.lastConnectedOn = timeMS()
-                update(st);
-            })
-        }
-        else {
-            st.isChatUpdated = true;
-            update(st)
+                update(st)
+            }
         }
     },
     getUser(user_id) {
@@ -771,6 +773,7 @@ var state = {
         st.latestEvent = null
         st.messages = []
         st.typingUsers = []
+        st.isChatUpdated = false;
         update(st)
         if (clearCacheMsgs) {
             this.clearCacheMessages()
