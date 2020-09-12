@@ -23,7 +23,7 @@ class Chat extends React.Component {
         this.state = { messages: null, typing: [], exit: false, isConnected: false, chatSyncing: false }
     }
     componentDidMount() {
-        this.parseState();
+        this.parseState(true);
         window.setTimeout(() => {
             window.scrollTo(0, document.body.scrollHeight);
         }, 300)
@@ -31,11 +31,14 @@ class Chat extends React.Component {
             this.parseState();
         })
     }
-    parseState() {
+    parseState(canSync = false) {
         var st = window.state.getState();
         if (st.room) {
             var typing = []
             if (st.room.members) {
+                if (!st.isChatUpdated && canSync) {
+                    window.state.syncChats()
+                }
                 var users = st.room.members.friends.concat(st.room.members.others)
                 Object.keys(st.typingUsers).forEach(userId => {
                     var user = users.find((user) => { return user.user_id == userId })
@@ -114,14 +117,14 @@ class Chat extends React.Component {
     }
     getToast() {
         if (!this.state.isConnected)
-            return (<div className={"center "+css.toastContainer}>
-                <div className={"center "+css.toast}>Disconnected</div>
+            return (<div className={"center " + css.toastContainer}>
+                <div className={"center " + css.toast}>Disconnected</div>
             </div>)
         else if (this.state.chatSyncing)
-            return (<div className={"center "+css.toastContainer}>
-                <div className={"center "+css.toast}>Syncing..</div>
+            return (<div className={"center " + css.toastContainer}>
+                <div className={"center " + css.toast}>Syncing..</div>
             </div>)
-        else return(<div id={css.refButt} className={"center "+css.toast} onClick={()=>{
+        else return (<div id={css.refButt} className={"center " + css.toast} onClick={() => {
             window.state.resetCacheMessages()
         }}></div>)
     }
